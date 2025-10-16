@@ -30,12 +30,8 @@ class AppDataStore(
         preferences[userEmailKey]
     }
 
-    val lastSyncTime: Flow<Long> = context.dataStore.data.map { preferences ->
-        preferences[lastSyncTimeKey] ?: 0L
-    }
-
-    val isLoggedIn: Flow<Boolean> = authToken.map { token ->
-        !token.isNullOrEmpty()
+    val lastSyncTime: Flow<Long?> = context.dataStore.data.map { preferences ->
+        preferences[lastSyncTimeKey]
     }
 
     suspend fun saveAuthToken(token: String) {

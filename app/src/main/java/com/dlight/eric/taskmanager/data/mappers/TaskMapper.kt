@@ -14,8 +14,8 @@ object TaskMapper {
             title = title,
             description = description,
             completed = completed,
-            createdOn = DateUtils.formatToString(createdAt),
-            updatedOn = DateUtils.formatToString(updatedAt)
+            createdOn = DateUtils.formatSyncTimestamp(createdAt),
+            updatedOn = DateUtils.formatSyncTimestamp(updatedAt)
         )
     }
 
@@ -39,8 +39,8 @@ object TaskMapper {
             title = title ?: "",
             description = description ?: "",
             completed = completed ?: false,
-            createdOn = DateUtils.formatToString(createdTimestamp),
-            updatedOn = DateUtils.formatToString(updatedTimestamp)
+            createdOn = DateUtils.formatSyncTimestamp(createdTimestamp),
+            updatedOn = DateUtils.formatSyncTimestamp(updatedTimestamp)
         )
     }
 
@@ -77,8 +77,4 @@ object TaskMapper {
         )
     }
 
-    fun List<TaskEntity>.toDomainList(): List<Task> = map { it.toDomain() }
-    fun List<Task>.toEntityList(): List<TaskEntity> = map { it.toEntity() }
-    fun List<TaskDto>.toDomainListFromDto(): List<Task> = map { it.toDomain() }
-    fun List<Task>.toDtoList(): List<TaskDto> = map { it.toDto() }
 }

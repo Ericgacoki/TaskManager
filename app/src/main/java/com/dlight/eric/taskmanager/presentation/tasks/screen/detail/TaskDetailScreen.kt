@@ -7,20 +7,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.dlight.eric.taskmanager.utils.TaskMode
 
 @Composable
 fun TaskDetailScreen(
-    taskId: String = "",
-    editMode: Boolean = false
+    taskId: String = "0",
+    mode: TaskMode = TaskMode.VIEW
 ) {
     LaunchedEffect(taskId) {
-        // Fetch this Task from database
+        // Fetch this Task from database based on TaskMode
     }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Details for: $taskId ${if (editMode) "(Edit Mode)" else "(View Mode)"}")
+        val modeText = when (mode) {
+            TaskMode.CREATE -> "Create Mode"
+            TaskMode.EDIT -> "Edit Mode"
+            TaskMode.VIEW -> "View Mode"
+        }
+        Text(text = "Details for: $taskId ($modeText)")
     }
 }

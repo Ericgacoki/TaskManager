@@ -104,7 +104,7 @@ fun TaskItem(
 
                         DropdownMenuItem(
                             text = {
-                                Text(if (task.completed) "Mark as Incomplete" else "Mark as Complete")
+                                Text(if (task.completed) "Mark as Pending" else "Mark as Complete")
                             },
                             leadingIcon = {
                                 Icon(
