@@ -77,6 +77,9 @@ dependencies {
 
     // Data Store
     implementation(libs.androidx.datastore.preferences)
+    
+    // Lottie Animation
+    implementation(libs.lottie.compose)
 
     // Dependency Injection
     implementation(libs.hilt.android)
