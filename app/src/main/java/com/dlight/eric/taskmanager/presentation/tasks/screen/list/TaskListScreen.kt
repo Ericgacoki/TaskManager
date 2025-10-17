@@ -109,7 +109,7 @@ fun TaskListContent(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            // A custom row since AppTopBar introduces weirds upper padding
+            // A custom "AppBar" since AppTopBar introduces weirds upper padding
             Row(
                 modifier = Modifier
                     // .background(Color.Red)
@@ -130,9 +130,11 @@ fun TaskListContent(
                         text = "Tasks",
                         style = MaterialTheme.typography.headlineMedium
                     )
-                    if (uiState.tasks.isNotEmpty() && uiState.lastSyncTime != null) {
+                    if (uiState.tasks.isNotEmpty()) {
+                        val text = if (uiState.lastSyncTime == null) "Not Synced" else
+                            "Last Synced ${uiState.lastSyncTime}"
                         Text(
-                            text = "Last Synced ${uiState.lastSyncTime}",
+                            text = text,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -238,7 +240,7 @@ fun TaskListContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(uiState.tasks, key = { task -> task.id }) { task ->
                             TaskItem(
@@ -350,24 +352,24 @@ fun TaskListContentPreview() {
                         title = "Buy groceries",
                         description = "Milk, eggs, bread",
                         completed = false,
-                        createdOn = "Today",
-                        updatedOn = "2 hours ago"
+                        createdAt = "Today",
+                        updatedAt = "2 hours ago"
                     ),
                     Task(
                         id = "2",
                         title = "Complete project",
                         description = "Finish the Android app for d.Light",
                         completed = false,
-                        createdOn = "Yesterday",
-                        updatedOn = "1 hour ago"
+                        createdAt = "Yesterday",
+                        updatedAt = "1 hour ago"
                     ),
                     Task(
                         id = "3",
                         title = "Call mom",
                         description = "Weekly check-in call",
                         completed = true,
-                        createdOn = "2 days ago",
-                        updatedOn = "Yesterday"
+                        createdAt = "2 days ago",
+                        updatedAt = "Yesterday"
                     )
                 )
             ),

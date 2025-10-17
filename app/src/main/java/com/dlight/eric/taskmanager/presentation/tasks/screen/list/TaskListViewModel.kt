@@ -22,6 +22,7 @@ class TaskListViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    // TODO: use .update{} to mutate states
     private val _tasksUiState = MutableStateFlow(TaskListUiState())
     val tasksUiState: StateFlow<TaskListUiState> = _tasksUiState.asStateFlow()
 
