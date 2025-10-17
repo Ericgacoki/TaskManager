@@ -42,6 +42,10 @@ android {
     }
 }
 
+hilt {
+    enableAggregatingTask = false
+}
+
 dependencies {
     // Core Android
     implementation(libs.androidx.core.ktx)
