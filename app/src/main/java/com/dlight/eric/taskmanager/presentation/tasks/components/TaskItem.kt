@@ -190,7 +190,8 @@ fun TaskItemPreview() {
                         description = "Need to get milk, eggs, bread, apples, spinach, and other essentials for the upcoming week",
                         completed = false,
                         createdAt = "Today",
-                        updatedAt = "2 hours ago"
+                        updatedAt = "2 hours ago",
+                        dueDate = "Today"
                     ),
                     onEditClick = { },
                     onToggleComplete = { _, _ -> },
@@ -206,7 +207,8 @@ fun TaskItemPreview() {
                         description = "",
                         completed = true,
                         createdAt = "Yesterday",
-                        updatedAt = "Yesterday"
+                        updatedAt = "Yesterday",
+                        dueDate = "Today"
                     ),
                     onEditClick = {},
                     onToggleComplete = { _, _ -> },
@@ -222,7 +224,8 @@ fun TaskItemPreview() {
                         description = "Short description here",
                         completed = false,
                         createdAt = "Last week",
-                        updatedAt = "Thur July 10"
+                        updatedAt = "Thur July 10",
+                        dueDate = "Today"
                     ),
                     onEditClick = {},
                     onToggleComplete = { _, _ -> },

@@ -11,6 +11,8 @@ data class TaskDto(
     val description: String?,
     @SerializedName("completed")
     val completed: Boolean?,
+    @SerializedName("dueDate")
+    val dueDate: String?,
     @SerializedName("createdAt")
     val createdAt: String?,
     @SerializedName("updatedAt")
