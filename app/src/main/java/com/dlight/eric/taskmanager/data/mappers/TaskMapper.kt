@@ -14,8 +14,8 @@ object TaskMapper {
             title = title,
             description = description,
             completed = completed,
-            createdAt = DateUtils.formatToString(createdAt),
-            updatedAt = DateUtils.formatToString(updatedAt)
+            createdOn = DateUtils.formatToString(createdAt),
+            updatedOn = DateUtils.formatToString(updatedAt)
         )
     }
 
@@ -39,8 +39,8 @@ object TaskMapper {
             title = title ?: "",
             description = description ?: "",
             completed = completed ?: false,
-            createdAt = DateUtils.formatToString(createdTimestamp),
-            updatedAt = DateUtils.formatToString(updatedTimestamp)
+            createdOn = DateUtils.formatToString(createdTimestamp),
+            updatedOn = DateUtils.formatToString(updatedTimestamp)
         )
     }
 
