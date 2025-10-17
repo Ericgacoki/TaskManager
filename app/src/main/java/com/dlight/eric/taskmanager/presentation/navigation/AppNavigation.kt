@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dlight.eric.taskmanager.presentation.auth.screen.LoginScreen
 import com.dlight.eric.taskmanager.presentation.auth.screen.AuthViewModel
+import com.dlight.eric.taskmanager.utils.TaskMode
 import com.dlight.eric.taskmanager.presentation.tasks.screen.list.TaskListScreen
 import com.dlight.eric.taskmanager.presentation.tasks.screen.detail.TaskDetailScreen
 import com.dlight.eric.taskmanager.utils.Resource
@@ -57,17 +58,35 @@ fun AppNavigation(
                 
                 composable("tasks") {
                     TaskListScreen(
-                        onGotoDetail = { taskId, editMode ->
-                            navController.navigate("task_detail/$taskId/$editMode")
+                        onNavigateToTask = { taskId, mode ->
+                            navController.navigate("task_detail/$taskId/$mode")
+                        },
+                        onLogOut = {
+                            navController.navigate("login") {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = true
+                                }
+                            }
                         }
                     )
                 }
                 
-                composable("task_detail/{taskId}/{editMode}") { backStackEntry ->
-                    val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
-                    val editMode = backStackEntry.arguments?.getString("editMode")?.toBoolean() ?: false
+                composable("task_detail/{taskId}/{mode}") { backStackEntry ->
+                    val taskId = backStackEntry.arguments?.getString("taskId") ?: "0"
+                    val modeString = backStackEntry.arguments?.getString("mode") ?: "VIEW"
+                    val mode = try {
+                        TaskMode.valueOf(modeString)
+                    } catch (e: IllegalArgumentException) {
+                        TaskMode.VIEW
+                    }
 
-                    TaskDetailScreen(taskId = taskId, editMode = editMode)
+                    TaskDetailScreen(
+                        taskId = taskId, 
+                        mode = mode,
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }

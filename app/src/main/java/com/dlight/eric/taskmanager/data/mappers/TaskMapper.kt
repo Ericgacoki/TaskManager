@@ -7,15 +7,15 @@ import com.dlight.eric.taskmanager.utils.DateUtils
 import java.util.UUID
 
 object TaskMapper {
-    
-    fun TaskEntity.toDomain(): Task {
+
+     fun TaskEntity.toDomain(): Task {
         return Task(
             id = id,
             title = title,
             description = description,
             completed = completed,
-            createdOn = DateUtils.formatToString(createdAt),
-            updatedOn = DateUtils.formatToString(updatedAt)
+            createdAt = DateUtils.formatTimestamp(createdAt),
+            updatedAt = DateUtils.formatTimestamp(updatedAt)
         )
     }
 
@@ -31,16 +31,18 @@ object TaskMapper {
     }
 
     fun TaskDto.toDomain(): Task {
-        val createdTimestamp = createdAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
-        val updatedTimestamp = updatedAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
-        
+        val createdTimestamp =
+            createdAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
+        val updatedTimestamp =
+            updatedAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
+
         return Task(
             id = id ?: UUID.randomUUID().toString(),
             title = title ?: "",
             description = description ?: "",
             completed = completed ?: false,
-            createdOn = DateUtils.formatToString(createdTimestamp),
-            updatedOn = DateUtils.formatToString(updatedTimestamp)
+            createdAt = DateUtils.formatTimestamp(createdTimestamp),
+            updatedAt = DateUtils.formatTimestamp(updatedTimestamp)
         )
     }
 
@@ -72,13 +74,11 @@ object TaskMapper {
             title = title ?: "",
             description = description ?: "",
             completed = completed ?: false,
-            createdAt = createdAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis(),
-            updatedAt = updatedAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
+            createdAt = createdAt?.let { DateUtils.parseIsoString(it) }
+                ?: System.currentTimeMillis(),
+            updatedAt = updatedAt?.let { DateUtils.parseIsoString(it) }
+                ?: System.currentTimeMillis()
         )
     }
 
-    fun List<TaskEntity>.toDomainList(): List<Task> = map { it.toDomain() }
-    fun List<Task>.toEntityList(): List<TaskEntity> = map { it.toEntity() }
-    fun List<TaskDto>.toDomainListFromDto(): List<Task> = map { it.toDomain() }
-    fun List<Task>.toDtoList(): List<TaskDto> = map { it.toDto() }
 }

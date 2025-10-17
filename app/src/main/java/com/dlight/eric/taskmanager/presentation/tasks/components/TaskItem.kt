@@ -104,7 +104,7 @@ fun TaskItem(
 
                         DropdownMenuItem(
                             text = {
-                                Text(if (task.completed) "Mark as Incomplete" else "Mark as Complete")
+                                Text(if (task.completed) "Mark as Pending" else "Mark as Complete")
                             },
                             leadingIcon = {
                                 Icon(
@@ -160,7 +160,7 @@ fun TaskItem(
                 )
 
                 Text(
-                    text = task.updatedOn,
+                    text = task.updatedAt,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp
@@ -189,8 +189,8 @@ fun TaskItemPreview() {
                         title = "Buy groceries for the week including fruits and vegetables",
                         description = "Need to get milk, eggs, bread, apples, spinach, and other essentials for the upcoming week",
                         completed = false,
-                        createdOn = "Today",
-                        updatedOn = "2 hours ago"
+                        createdAt = "Today",
+                        updatedAt = "2 hours ago"
                     ),
                     onEditClick = { },
                     onToggleComplete = { _, _ -> },
@@ -205,8 +205,8 @@ fun TaskItemPreview() {
                         title = "Complete project documentation",
                         description = "",
                         completed = true,
-                        createdOn = "Yesterday",
-                        updatedOn = "Yesterday"
+                        createdAt = "Yesterday",
+                        updatedAt = "Yesterday"
                     ),
                     onEditClick = {},
                     onToggleComplete = { _, _ -> },
@@ -221,8 +221,8 @@ fun TaskItemPreview() {
                         title = "This is a very long task title that should be truncated with ellipsis when it exceeds the available space",
                         description = "Short description here",
                         completed = false,
-                        createdOn = "Last week",
-                        updatedOn = "Thur July 10"
+                        createdAt = "Last week",
+                        updatedAt = "Thur July 10"
                     ),
                     onEditClick = {},
                     onToggleComplete = { _, _ -> },
