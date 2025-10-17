@@ -67,10 +67,9 @@ dependencies {
 
     // Networking
     implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.gson)
 
     // WorkManager
@@ -82,6 +81,7 @@ dependencies {
     // Dependency Injection
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
     ksp(libs.androidx.hilt.compiler)
 

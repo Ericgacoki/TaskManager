@@ -1,9 +1,7 @@
 package com.dlight.eric.taskmanager.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class TaskDto(
     @SerializedName("id")
     val id: String?,

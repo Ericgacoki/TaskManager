@@ -35,16 +35,16 @@ fun StatusBadge(
     val backgroundColor = MaterialTheme.colorScheme.secondaryContainer
     val textColor = MaterialTheme.colorScheme.onSecondaryContainer
     
-    val statusText = if (isCompleted) "COMPLETE" else "PENDING"
+    val statusText = if (isCompleted) "COMPLETED" else "PENDING"
     val statusIconRes = if (isCompleted) R.drawable.ic_done else R.drawable.ic_pending
 
     Box(
         modifier = modifier
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp)
             )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -54,21 +54,20 @@ fun StatusBadge(
                 painter = painterResource(id = statusIconRes),
                 contentDescription = null,
                 tint = textColor,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(16.dp)
             )
             
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.labelSmall,
                 color = textColor,
-                fontWeight = FontWeight.Medium,
-                fontSize = 10.sp
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
             )
         }
     }
 }
 
-@PreviewLightDark
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun StatusBadgePreview() {
