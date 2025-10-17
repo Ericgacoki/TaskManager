@@ -10,6 +10,7 @@ data class TaskEntity(
     val title: String,
     val description: String,
     val completed: Boolean,
+    val dueDate: Long,
     val createdAt: Long,
     val updatedAt: Long
 )

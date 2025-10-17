@@ -32,6 +32,7 @@ class TaskDetailViewModel @Inject constructor(
         when (event) {
             is TaskDetailEvent.InitializeTask -> initializeTask(event.taskId, event.mode)
             is TaskDetailEvent.UpdateTaskInput -> updateTask(event.title, event.description)
+            is TaskDetailEvent.UpdateDueDate -> updateDueDate(event.dueDateMillis)
             is TaskDetailEvent.PerformAction -> handleTaskAction(event.action)
             is TaskDetailEvent.ToggleCompletion -> toggleTaskCompletion(event.isCompleted)
             is TaskDetailEvent.ClearAutoNavigationFlag -> clearAutoNavigationFlag()
@@ -54,6 +55,7 @@ class TaskDetailViewModel @Inject constructor(
             title = "",
             description = "",
             completed = false,
+            dueDate = DateUtils.formatToIsoString(System.currentTimeMillis()),
             createdAt = DateUtils.formatTimestamp(System.currentTimeMillis()),
             updatedAt = DateUtils.formatTimestamp(System.currentTimeMillis())
         )
@@ -131,6 +133,19 @@ class TaskDetailViewModel @Inject constructor(
             val updatedTask = currentTask.copy(
                 title = title,
                 description = description
+            )
+            state.copy(
+                updatedTask = updatedTask,
+                error = TaskDetailError.None
+            )
+        }
+    }
+
+    private fun updateDueDate(dueDateMillis: Long) {
+        _uiState.update { state ->
+            val currentTask = state.updatedTask ?: return@update state
+            val updatedTask = currentTask.copy(
+                dueDate = DateUtils.formatToIsoString(dueDateMillis)
             )
             state.copy(
                 updatedTask = updatedTask,

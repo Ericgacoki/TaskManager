@@ -9,6 +9,8 @@ sealed class TaskDetailEvent {
 
     data class UpdateTaskInput(val title: String, val description: String) : TaskDetailEvent()
 
+    data class UpdateDueDate(val dueDateMillis: Long) : TaskDetailEvent()
+
     data class PerformAction(val action: TaskAction) : TaskDetailEvent()
 
     data class ToggleCompletion(val isCompleted: Boolean) : TaskDetailEvent()
