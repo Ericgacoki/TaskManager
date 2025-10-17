@@ -353,7 +353,8 @@ fun TaskListContentPreview() {
                         description = "Milk, eggs, bread",
                         completed = false,
                         createdAt = "Today",
-                        updatedAt = "2 hours ago"
+                        updatedAt = "2 hours ago",
+                        dueDate = "Today"
                     ),
                     Task(
                         id = "2",
@@ -361,7 +362,8 @@ fun TaskListContentPreview() {
                         description = "Finish the Android app for d.Light",
                         completed = false,
                         createdAt = "Yesterday",
-                        updatedAt = "1 hour ago"
+                        updatedAt = "1 hour ago",
+                        dueDate = "Today"
                     ),
                     Task(
                         id = "3",
@@ -369,7 +371,8 @@ fun TaskListContentPreview() {
                         description = "Weekly check-in call",
                         completed = true,
                         createdAt = "2 days ago",
-                        updatedAt = "Yesterday"
+                        updatedAt = "Yesterday",
+                        dueDate = "Today"
                     )
                 )
             ),

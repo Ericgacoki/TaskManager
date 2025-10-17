@@ -2,6 +2,7 @@ package com.dlight.eric.taskmanager.presentation.tasks.screen.detail
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,16 +16,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,8 +36,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +60,7 @@ import com.dlight.eric.taskmanager.presentation.tasks.event.TaskDetailEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskDetailError
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskDetailState
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
+import com.dlight.eric.taskmanager.utils.DateUtils
 import com.dlight.eric.taskmanager.utils.TaskAction
 import com.dlight.eric.taskmanager.utils.TaskMode
 
@@ -86,15 +93,19 @@ fun TaskDetailScreen(
             uiState.taskMode == TaskMode.CREATE && uiState.isTaskModified -> {
                 showBackPressDialog = true
             }
+
             uiState.taskMode == TaskMode.CREATE && !uiState.isTaskModified -> {
                 viewModel.onEvent(TaskDetailEvent.PerformAction(TaskAction.CANCEL))
             }
+
             uiState.taskMode == TaskMode.EDIT && uiState.isTaskModified -> {
                 showBackPressDialog = true
             }
+
             uiState.taskMode == TaskMode.EDIT && !uiState.isTaskModified -> {
                 viewModel.onEvent(TaskDetailEvent.PerformAction(TaskAction.CANCEL))
             }
+
             else -> onNavigateBack()
         }
     }
@@ -147,6 +158,9 @@ fun TaskDetailScreen(
         onToggleCompletion = { isChecked ->
             viewModel.onEvent(TaskDetailEvent.ToggleCompletion(isChecked))
         },
+        onDueDateChange = { dateMillis ->
+            viewModel.onEvent(TaskDetailEvent.UpdateDueDate(dateMillis))
+        },
         showDiscardDialog = showBackPressDialog,
         onDiscardDialogDismiss = { showBackPressDialog = false }
     )
@@ -165,6 +179,7 @@ fun TaskDetailScreenContent(
     onCancelClick: () -> Unit = {},
     onDiscardFromBackPress: () -> Unit = {},
     onToggleCompletion: (Boolean) -> Unit = {},
+    onDueDateChange: (Long) -> Unit = {},
     showDeleteDialog: Boolean = false,
     showDiscardDialog: Boolean = false,
     onDeleteDialogDismiss: () -> Unit = {},
@@ -172,6 +187,35 @@ fun TaskDetailScreenContent(
 ) {
     var internalShowDeleteDialog by remember { mutableStateOf(showDeleteDialog) }
     var internalShowDiscardDialog by remember { mutableStateOf(showDiscardDialog) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val currentDueDateMillis = uiState.updatedTask?.dueDate?.let {
+        DateUtils.parseIsoString(it)
+    }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = currentDueDateMillis,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // Only allow selecting today or future dates
+                val calendar = java.util.Calendar.getInstance()
+                calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+                calendar.set(java.util.Calendar.MINUTE, 0)
+                calendar.set(java.util.Calendar.SECOND, 0)
+                calendar.set(java.util.Calendar.MILLISECOND, 0)
+
+                val todayStart = calendar.timeInMillis
+                return utcTimeMillis >= todayStart
+            }
+        }
+    )
+
+    // Update the date picker state when the due date changes
+    LaunchedEffect(currentDueDateMillis) {
+        currentDueDateMillis?.let {
+            datePickerState.selectedDateMillis = it
+        }
+    }
 
     LaunchedEffect(showDeleteDialog) {
         internalShowDeleteDialog = showDeleteDialog
@@ -291,7 +335,72 @@ fun TaskDetailScreenContent(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                modifier = Modifier.padding(start = 4.dp),
+                                text = "Due Date",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+
+                            Spacer(Modifier.height(4.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(shape = RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1F))
+                                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = uiState.updatedTask?.dueDate?.let {
+                                        DateUtils.formatDueDate(DateUtils.parseIsoString(it))
+                                    } ?: "N/A",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .width(28.dp)
+                                .height(2.dp)
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1F))
+                        )
+
+                        Column {
+                            Text(
+                                modifier = Modifier.padding(start = 4.dp),
+                                text = "Updated",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+
+                            Spacer(Modifier.height(4.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(shape = RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1F))
+                                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = uiState.updatedTask?.updatedAt ?: "N/A",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -349,6 +458,61 @@ fun TaskDetailScreenContent(
                         maxLines = 10,
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(shape = RoundedCornerShape(4.dp))
+                            .clickable {
+                                showDatePicker = true
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = "Calendar",
+                                modifier = Modifier.size(24.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    modifier = Modifier.padding(start = 4.dp),
+                                    text = "Due Date",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+
+                                Spacer(Modifier.height(4.dp))
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(shape = RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1F))
+                                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = uiState.updatedTask?.dueDate?.let {
+                                            DateUtils.formatDueDate(DateUtils.parseIsoString(it))
+                                        } ?: "Today",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -469,6 +633,40 @@ fun TaskDetailScreenContent(
             }
         )
     }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedDate ->
+                            onDueDateChange(selectedDate)
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                title = {
+                    Text(
+                        text = "Select Due Date",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp)
+                    )
+                }
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -486,6 +684,7 @@ private fun TaskDetailScreenPreview() {
             title = "Original Task",
             description = "Original description",
             completed = false,
+            dueDate = "2025-01-01T10:00:00Z",
             createdAt = "2024-01-01T10:00:00Z",
             updatedAt = "2024-01-01T10:00:00Z"
         )
@@ -495,6 +694,7 @@ private fun TaskDetailScreenPreview() {
             title = title,
             description = description,
             completed = false,
+            dueDate = "2025-01-01T10:00:00Z",
             createdAt = "2024-01-01T10:00:00Z",
             updatedAt = "2024-01-01T10:00:00Z"
         )
@@ -527,21 +727,25 @@ private fun TaskDetailScreenDarkPreview() {
     TaskManagerTheme(dynamicColor = false) {
         TaskDetailScreenContent(
             uiState = TaskDetailState(
-                originalTask = Task(
-                    id = "1",
-                    title = "Night Mode Task",
-                    description = "Testing dark theme",
-                    completed = false,
-                    createdAt = "2024-01-01T10:00:00Z",
-                    updatedAt = "2024-01-01T10:00:00Z"
-                ),
+                originalTask = null,
                 updatedTask = Task(
                     id = "1",
-                    title = "Night Mode Task",
-                    description = "Testing dark theme",
+                    title = "SHOPPING BY SECTION",
+                    description = "Produce:\n" +
+                            "  • 2 lbs chicken breast, 1 lb ground\n" +
+                            "  • Bell peppers, zucchini, carrots\n" +
+                            "  • Onions, garlic, ginger\n" +
+                            "  • Lemons, limes, tomatoes, lettuce, cabbage\n" +
+                            "  • Bananas, apples\n" +
+                            "\n" +
+                            "Pantry/Dry Goods:\n" +
+                            "  • Quinoa, brown rice, basmati rice, wheat\n" +
+                            "  • Spices: curry powder\n" +
+                            "  • Flour, vanilla extract",
                     completed = false,
+                    dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2024-01-01T10:00:00Z",
-                    updatedAt = "2024-01-01T10:00:00Z"
+                    updatedAt = "45 minutes ago"
                 ),
                 taskMode = TaskMode.VIEW
             )
@@ -563,6 +767,7 @@ private fun TaskDetailScreenDialogsPreview() {
                     title = "Test Task",
                     description = "Test description",
                     completed = false,
+                    dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2025-01-01T10:00:00Z",
                     updatedAt = "2025-01-01T10:00:00Z"
                 ),
@@ -571,6 +776,7 @@ private fun TaskDetailScreenDialogsPreview() {
                     title = "Modified Task",
                     description = "Click discard to preview dialog",
                     completed = false,
+                    dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2025-01-01T10:00:00Z",
                     updatedAt = "2025-01-01T10:00:00Z"
                 ),

@@ -56,4 +56,44 @@ object DateUtils {
             }
         }
     }
+
+    /**
+     * Formats a timestamp to a date string for due dates
+     * 
+     * Examples:
+     * - "Today" (same day)
+     * - "Tomorrow" (next day)
+     * - "Yesterday" (previous day)  
+     * - "Jan 15, 2025" (other dates)
+     */
+    fun formatDueDate(timestamp: Long): String {
+        // Compare calendar dates, not timestamps for accuracy.
+        val todayCalendar = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        
+        val dueCalendar = java.util.Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }
+        
+        // Calculate difference in days
+        val daysDiff = ((dueCalendar.timeInMillis - todayCalendar.timeInMillis) / 86400_000L).toInt()
+        
+        return when (daysDiff) {
+            -1 -> "Yesterday"
+            0 -> "Today"
+            1 -> "Tomorrow"
+            else -> {
+                val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                formatter.format(Date(timestamp))
+            }
+        }
+    }
 }
