@@ -1,11 +1,9 @@
 package com.dlight.eric.taskmanager.utils
 
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import java.util.concurrent.TimeUnit
 
 object DateUtils {
     private val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
@@ -34,7 +32,7 @@ object DateUtils {
      * - "3 days ago"
      * - "Jul 10, 2025" (> 1 week)
      */
-    fun formatSyncTimestamp(timestamp: Long): String {
+    fun formatTimestamp(timestamp: Long): String {
         val now = System.currentTimeMillis()
         val diff = now - timestamp
 

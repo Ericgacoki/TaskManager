@@ -126,7 +126,7 @@ class TaskDataRepository @Inject constructor(
         return appDataStore.lastSyncTime.map { timestamp ->
             try {
                 if (timestamp != null && timestamp > 0) {
-                    DateUtils.formatSyncTimestamp(timestamp)
+                    DateUtils.formatTimestamp(timestamp)
                 } else {
                     null
                 }

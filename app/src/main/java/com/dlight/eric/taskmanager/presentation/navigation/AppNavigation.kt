@@ -80,7 +80,13 @@ fun AppNavigation(
                         TaskMode.VIEW
                     }
 
-                    TaskDetailScreen(taskId = taskId, mode = mode)
+                    TaskDetailScreen(
+                        taskId = taskId, 
+                        mode = mode,
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }
