@@ -8,11 +8,14 @@ import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
 import com.dlight.eric.taskmanager.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,13 +25,13 @@ class TaskListViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    // TODO: use .update{} to mutate states
     private val _tasksUiState = MutableStateFlow(TaskListUiState())
     val tasksUiState: StateFlow<TaskListUiState> = _tasksUiState.asStateFlow()
 
     init {
-        onEvent(TaskEvent.LoadTasks)
         getLastSyncTime()
+        getUnSyncedTaskCount()
+        onEvent(TaskEvent.LoadTasks)
     }
 
     fun onEvent(event: TaskEvent) {
@@ -50,40 +53,47 @@ class TaskListViewModel @Inject constructor(
     private fun loadTasks(pullToRefresh: Boolean = false) {
         viewModelScope.launch {
             if (pullToRefresh) {
-                _tasksUiState.value = _tasksUiState.value.copy(
-                    isLoading = false,
-                    isPullingToRefresh = true,
-                    error = null
-                )
-                // simulate await call
-                delay(3000)
+                _tasksUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isPullingToRefresh = true,
+                        error = null
+                    )
+                }
+                delay(3000) // simulate await call
             }
 
             taskRepository.getAllTasks().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
-                        _tasksUiState.value = _tasksUiState.value.copy(
-                            isLoading = !pullToRefresh,
-                            isPullingToRefresh = pullToRefresh,
-                            error = null
-                        )
+                        _tasksUiState.update {
+                            it.copy(
+                                isLoading = !pullToRefresh,
+                                isPullingToRefresh = pullToRefresh,
+                                error = null
+                            )
+                        }
                     }
 
                     is Resource.Success -> {
-                        _tasksUiState.value = _tasksUiState.value.copy(
-                            isLoading = false,
-                            isPullingToRefresh = false,
-                            tasks = result.data ?: emptyList(),
-                            error = null
-                        )
+                        _tasksUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isPullingToRefresh = false,
+                                tasks = result.data ?: emptyList(),
+                                error = null
+                            )
+                        }
                     }
 
                     is Resource.Error -> {
-                        _tasksUiState.value = _tasksUiState.value.copy(
-                            isLoading = false,
-                            isPullingToRefresh = false,
-                            error = result.message
-                        )
+                        _tasksUiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isPullingToRefresh = false,
+                                error = result.message
+                            )
+                        }
                     }
                 }
             }
@@ -94,9 +104,9 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             val result = taskRepository.updateTaskCompletion(taskId, isCompleted)
             if (result is Resource.Error) {
-                _tasksUiState.value = _tasksUiState.value.copy(
-                    error = result.message
-                )
+                _tasksUiState.update {
+                    it.copy(error = result.message)
+                }
             }
         }
     }
@@ -105,9 +115,9 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             val result = taskRepository.deleteTaskById(taskId)
             if (result is Resource.Error) {
-                _tasksUiState.value = _tasksUiState.value.copy(
-                    error = result.message
-                )
+                _tasksUiState.update {
+                    it.copy(error = result.message)
+                }
             }
         }
     }
@@ -116,9 +126,9 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             val result = taskRepository.deleteAllTasks()
             if (result is Resource.Error) {
-                _tasksUiState.value = _tasksUiState.value.copy(
-                    error = result.message
-                )
+                _tasksUiState.update {
+                    it.copy(error = result.message)
+                }
             }
         }
     }
@@ -133,11 +143,33 @@ class TaskListViewModel @Inject constructor(
 
     private fun getLastSyncTime() {
         viewModelScope.launch {
-            taskRepository.getLastSyncTimeFlow().collectLatest { lastSyncTime ->
-                _tasksUiState.value = _tasksUiState.value.copy(
-                    lastSyncTime = lastSyncTime
-                )
+            taskRepository.getFormatedLastSyncTime().collectLatest { lastSyncTime ->
+                _tasksUiState.update {
+                    it.copy(lastSyncTime = lastSyncTime)
+                }
             }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun getUnSyncedTaskCount() {
+        viewModelScope.launch {
+            taskRepository.getLastSyncTimestamp()
+                .flatMapLatest { timestamp ->
+                    if (timestamp != null) {
+                        taskRepository.getUnSyncedTaskCount(timestamp)
+                    } else {
+                        // if lastSyncTime is null, then all the local tasks are not synced
+                        taskRepository.getTaskCount()
+                    }
+                }
+                .collect { result ->
+                    if (result is Resource.Success) {
+                        _tasksUiState.update {
+                            it.copy(unSyncedTaskCount = result.data ?: 0)
+                        }
+                    }
+                }
         }
     }
 
@@ -149,3 +181,4 @@ class TaskListViewModel @Inject constructor(
         loadTasks()
     }
 }
+

@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dlight.eric.taskmanager.R
 import com.dlight.eric.taskmanager.domain.model.Task
 import com.dlight.eric.taskmanager.presentation.tasks.components.TaskItem
+import com.dlight.eric.taskmanager.presentation.tasks.components.UnSyncedTasksHeader
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
@@ -131,7 +132,7 @@ fun TaskListContent(
                         style = MaterialTheme.typography.headlineMedium
                     )
                     if (uiState.tasks.isNotEmpty()) {
-                        val text = if (uiState.lastSyncTime == null) "Not Synced" else
+                        val text = if (uiState.lastSyncTime == null) "No sync history" else
                             "Last Synced ${uiState.lastSyncTime}"
                         Text(
                             text = text,
@@ -239,9 +240,22 @@ fun TaskListContent(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
+                            .padding(
+                                top = 8.dp,
+                                bottom = 16.dp,
+                                start = 16.dp,
+                                end = 16.dp
+                            ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        if (uiState.unSyncedTaskCount > 0) {
+                            stickyHeader {
+                                UnSyncedTasksHeader(
+                                    unSyncedCount = uiState.unSyncedTaskCount
+                                )
+                            }
+                        }
+
                         items(uiState.tasks, key = { task -> task.id }) { task ->
                             TaskItem(
                                 task = task,
@@ -345,6 +359,7 @@ fun TaskListContentPreview() {
             uiState = TaskListUiState(
                 isLoading = false,
                 lastSyncTime = "5 min ago",
+                unSyncedTaskCount = 2,
                 isPullingToRefresh = true,
                 tasks = listOf(
                     Task(

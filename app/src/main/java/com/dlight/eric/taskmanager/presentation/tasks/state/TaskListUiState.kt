@@ -5,6 +5,7 @@ import com.dlight.eric.taskmanager.domain.model.Task
 data class TaskListUiState(
     val isLoading: Boolean = true,
     val tasks: List<Task> = emptyList(),
+    val unSyncedTaskCount: Int = 0,
     val error: String? = null,
     val lastSyncTime: String? = null,
     val isPullingToRefresh: Boolean = false
