@@ -103,6 +103,16 @@ class TaskDataRepository @Inject constructor(
         }
     }
 
+    override fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>> {
+        return taskDao.getUnSyncedTaskCount(lastSyncTimestamp).map { count ->
+            try {
+                Resource.Success(count)
+            } catch (e: Exception) {
+                Resource.Error(e.message ?: "Failed to get task count")
+            }
+        }
+    }
+
     override fun getCompletedTaskCount(): Flow<Resource<Int>> {
         return taskDao.getCompletedTaskCount().map { count ->
             try {
@@ -122,7 +132,7 @@ class TaskDataRepository @Inject constructor(
         }
     }
 
-    override fun getLastSyncTimeFlow(): Flow<String?> {
+    override fun getFormatedLastSyncTime(): Flow<String?> {
         return appDataStore.lastSyncTime.map { timestamp ->
             try {
                 if (timestamp != null && timestamp > 0) {
@@ -135,4 +145,6 @@ class TaskDataRepository @Inject constructor(
             }
         }
     }
+
+    override fun getLastSyncTimestamp(): Flow<Long?> = appDataStore.lastSyncTime
 }
