@@ -19,16 +19,12 @@ class AppDataStore(
     }
 
     private val authTokenKey = stringPreferencesKey("auth_token")
-    private val userEmailKey = stringPreferencesKey("user_email")
     private val lastSyncTimeKey = longPreferencesKey("last_sync_time")
 
     val authToken: Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[authTokenKey]
     }
 
-    val userEmail: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[userEmailKey]
-    }
 
     val lastSyncTime: Flow<Long?> = context.dataStore.data.map { preferences ->
         preferences[lastSyncTimeKey]
@@ -40,11 +36,6 @@ class AppDataStore(
         }
     }
 
-    suspend fun saveUserEmail(email: String) {
-        context.dataStore.edit { preferences ->
-            preferences[userEmailKey] = email
-        }
-    }
 
     suspend fun saveLastSyncTime(timestamp: Long) {
         context.dataStore.edit { preferences ->
@@ -55,7 +46,6 @@ class AppDataStore(
     suspend fun clearAuthData() {
         context.dataStore.edit { preferences ->
             preferences.remove(authTokenKey)
-            preferences.remove(userEmailKey)
         }
     }
 }

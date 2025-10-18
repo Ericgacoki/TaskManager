@@ -22,7 +22,7 @@ object TaskMapper {
 
     fun Task.toEntity(timestampCreated: Long? = null, timestampUpdated: Long? = null, timestampDueDate: Long? = null): TaskEntity {
         return TaskEntity(
-            id = id,
+            id = id.ifEmpty {  UUID.randomUUID().toString() },
             title = title,
             description = description,
             completed = completed,
@@ -50,7 +50,7 @@ object TaskMapper {
 
     fun Task.toDto(isoCreatedAt: String? = null, isoUpdatedAt: String? = null, isoDueDate: String? = null): TaskDto {
         return TaskDto(
-            id = id,
+            id = id.ifEmpty {  UUID.randomUUID().toString() },
             title = title,
             description = description.ifEmpty { null },
             completed = completed,
