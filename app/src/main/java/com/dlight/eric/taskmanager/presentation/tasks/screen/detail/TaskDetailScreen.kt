@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -125,8 +126,7 @@ fun TaskDetailScreen(
         onDescriptionChange = { description ->
             viewModel.onEvent(
                 TaskDetailEvent.UpdateTaskInput(
-                    uiState.updatedTask?.title ?: "",
-                    description
+                    uiState.updatedTask?.title ?: "", description
                 )
             )
         },
@@ -162,8 +162,7 @@ fun TaskDetailScreen(
             viewModel.onEvent(TaskDetailEvent.UpdateDueDate(dateMillis))
         },
         showDiscardDialog = showBackPressDialog,
-        onDiscardDialogDismiss = { showBackPressDialog = false }
-    )
+        onDiscardDialogDismiss = { showBackPressDialog = false })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,8 +206,7 @@ fun TaskDetailScreenContent(
                 val todayStart = calendar.timeInMillis
                 return utcTimeMillis >= todayStart
             }
-        }
-    )
+        })
 
     // Update the date picker state when the due date changes
     LaunchedEffect(currentDueDateMillis) {
@@ -237,11 +235,7 @@ fun TaskDetailScreenContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        top = 16.dp,
-                        start = 8.dp,
-                        end = 8.dp
-                    ),
+                    .padding(top = 16.dp, start = 8.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -287,8 +281,7 @@ fun TaskDetailScreenContent(
                     }
                 }
             }
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -298,8 +291,7 @@ fun TaskDetailScreenContent(
         ) {
             if (uiState.isLoading) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -312,11 +304,10 @@ fun TaskDetailScreenContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = uiState.updatedTask?.title?.takeIf { it.isNotBlank() } ?: "No title",
+                    Text(text = uiState.updatedTask?.title?.takeIf { it.isNotBlank() }
+                        ?: "No title",
                         style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        modifier = Modifier.fillMaxWidth())
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -328,12 +319,10 @@ fun TaskDetailScreenContent(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = uiState.updatedTask?.description?.takeIf { it.isNotBlank() }
-                            ?: "No description",
+                    Text(text = uiState.updatedTask?.description?.takeIf { it.isNotBlank() }
+                        ?: "No description",
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        modifier = Modifier.fillMaxWidth())
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -358,21 +347,18 @@ fun TaskDetailScreenContent(
                                     .padding(horizontal = 6.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = uiState.updatedTask?.dueDate?.let {
-                                        DateUtils.formatDueDate(DateUtils.parseIsoString(it))
-                                    } ?: "N/A",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                                Text(text = uiState.updatedTask?.dueDate?.let {
+                                    DateUtils.formatDueDate(DateUtils.parseIsoString(it))
+                                } ?: "N/A", style = MaterialTheme.typography.bodyLarge)
                             }
                         }
 
                         Box(
                             modifier = Modifier
-                                .padding(top = 16.dp)
+                                .padding(top = 20.dp)
                                 .width(28.dp)
                                 .height(2.dp)
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1F))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12F))
                         )
 
                         Column {
@@ -411,8 +397,7 @@ fun TaskDetailScreenContent(
                             .clickable {
                                 val currentlyCompleted = uiState.updatedTask?.completed ?: false
                                 onToggleCompletion(!currentlyCompleted)
-                            }
-                    ) {
+                            }) {
                         Checkbox(
                             checked = uiState.updatedTask?.completed ?: false,
                             onCheckedChange = null // Disable checkbox own click handling
@@ -425,8 +410,7 @@ fun TaskDetailScreenContent(
                                 "Task completed"
                             } else {
                                 "Mark as complete"
-                            },
-                            style = MaterialTheme.typography.bodyLarge
+                            }, style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 } else {
@@ -467,8 +451,7 @@ fun TaskDetailScreenContent(
                             .clip(shape = RoundedCornerShape(4.dp))
                             .clickable {
                                 showDatePicker = true
-                            },
-                        colors = CardDefaults.cardColors(
+                            }, colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
@@ -542,8 +525,7 @@ fun TaskDetailScreenContent(
                         ) {
                             if (uiState.isSaving) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp
+                                    modifier = Modifier.size(16.dp), strokeWidth = 2.dp
                                 )
                             } else {
                                 Text("SAVE")
@@ -584,8 +566,7 @@ fun TaskDetailScreenContent(
                         onDeleteClick()
                         internalShowDeleteDialog = false
                         onDeleteDialogDismiss()
-                    }
-                ) {
+                    }) {
                     Text("Delete")
                 }
             },
@@ -594,12 +575,10 @@ fun TaskDetailScreenContent(
                     onClick = {
                         internalShowDeleteDialog = false
                         onDeleteDialogDismiss()
-                    }
-                ) {
+                    }) {
                     Text("Cancel")
                 }
-            }
-        )
+            })
     }
 
     if (internalShowDiscardDialog) {
@@ -616,8 +595,7 @@ fun TaskDetailScreenContent(
                         onDiscardFromBackPress()
                         internalShowDiscardDialog = false
                         onDiscardDialogDismiss()
-                    }
-                ) {
+                    }) {
                     Text("Discard")
                 }
             },
@@ -626,41 +604,34 @@ fun TaskDetailScreenContent(
                     onClick = {
                         internalShowDiscardDialog = false
                         onDiscardDialogDismiss()
-                    }
-                ) {
+                    }) {
                     Text("Keep Editing")
                 }
-            }
-        )
+            })
     }
 
     if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { selectedDate ->
-                            onDueDateChange(selectedDate)
-                        }
-                        showDatePicker = false
+        DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { selectedDate ->
+                        onDueDateChange(selectedDate)
                     }
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
+                    showDatePicker = false
+                }) {
+                Text("OK")
             }
-        ) {
+        }, dismissButton = {
+            TextButton(onClick = { showDatePicker = false }) {
+                Text("Cancel")
+            }
+        }) {
             DatePicker(
-                state = datePickerState,
-                title = {
+                state = datePickerState, title = {
                     Text(
-                        text = "Select Due Date",
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = "Due Date",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp)
                     )
                 }
@@ -716,38 +687,27 @@ private fun TaskDetailScreenPreview() {
             showDeleteDialog = showDeleteDialog,
             showDiscardDialog = showDiscardDialog,
             onDeleteDialogDismiss = { showDeleteDialog = false },
-            onDiscardDialogDismiss = { showDiscardDialog = false }
-        )
+            onDiscardDialogDismiss = { showDiscardDialog = false })
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun TaskDetailScreenDarkPreview() {
     TaskManagerTheme(dynamicColor = false) {
         TaskDetailScreenContent(
             uiState = TaskDetailState(
-                originalTask = null,
-                updatedTask = Task(
+                originalTask = null, updatedTask = Task(
                     id = "1",
                     title = "SHOPPING BY SECTION",
-                    description = "Produce:\n" +
-                            "  • 2 lbs chicken breast, 1 lb ground\n" +
-                            "  • Bell peppers, zucchini, carrots\n" +
-                            "  • Onions, garlic, ginger\n" +
-                            "  • Lemons, limes, tomatoes, lettuce, cabbage\n" +
-                            "  • Bananas, apples\n" +
-                            "\n" +
-                            "Pantry/Dry Goods:\n" +
-                            "  • Quinoa, brown rice, basmati rice, wheat\n" +
-                            "  • Spices: curry powder\n" +
-                            "  • Flour, vanilla extract",
+                    description = "Produce:\n" + "  • 2 lbs chicken breast, 1 lb ground\n" + "  • Bell peppers, zucchini, carrots\n" + "  • Onions, garlic, ginger\n" + "  • Lemons, limes, tomatoes, lettuce, cabbage\n" + "  • Bananas, apples\n" + "\n" + "Pantry/Dry Goods:\n" + "  • Quinoa, brown rice, basmati rice, wheat\n" + "  • Spices: curry powder\n" + "  • Flour, vanilla extract",
                     completed = false,
                     dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2024-01-01T10:00:00Z",
                     updatedAt = "45 minutes ago"
-                ),
-                taskMode = TaskMode.VIEW
+                ), taskMode = TaskMode.VIEW
             )
         )
     }
@@ -770,8 +730,7 @@ private fun TaskDetailScreenDialogsPreview() {
                     dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2025-01-01T10:00:00Z",
                     updatedAt = "2025-01-01T10:00:00Z"
-                ),
-                updatedTask = Task(
+                ), updatedTask = Task(
                     id = "1",
                     title = "Modified Task",
                     description = "Click discard to preview dialog",
@@ -779,13 +738,11 @@ private fun TaskDetailScreenDialogsPreview() {
                     dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2025-01-01T10:00:00Z",
                     updatedAt = "2025-01-01T10:00:00Z"
-                ),
-                taskMode = TaskMode.EDIT
+                ), taskMode = TaskMode.EDIT
             ),
             showDeleteDialog = showDeleteDialog,
             showDiscardDialog = showDiscardDialog,
             onDeleteDialogDismiss = { showDeleteDialog = false },
-            onDiscardDialogDismiss = { showDiscardDialog = false }
-        )
+            onDiscardDialogDismiss = { showDiscardDialog = false })
     }
 }

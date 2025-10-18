@@ -19,7 +19,7 @@ interface TaskDao {
     fun getTaskById(id: String): Flow<TaskEntity?>
     
     @Query("SELECT * FROM tasks WHERE updatedAt > :lastSyncTime")
-    fun getUnsyncedTasks(lastSyncTime: Long): Flow<List<TaskEntity>>
+    fun getUnSyncedTasks(lastSyncTime: Long): Flow<List<TaskEntity>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
@@ -49,5 +49,5 @@ interface TaskDao {
     fun getCompletedTaskCount(): Flow<Int>
     
     @Query("SELECT COUNT(*) FROM tasks WHERE updatedAt > :lastSyncTime")
-    fun getUnsyncedTaskCount(lastSyncTime: Long): Flow<Int>
+    fun getUnSyncedTaskCount(lastSyncTime: Long): Flow<Int>
 }

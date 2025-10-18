@@ -143,7 +143,9 @@ fun TaskItem(
                 Text(
                     text = task.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 10,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(Modifier.height(4.dp))

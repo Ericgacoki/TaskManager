@@ -23,6 +23,8 @@ interface TaskRepository {
     
     // Statistics
     fun getTaskCount(): Flow<Resource<Int>>
+
+    fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>>
     
     fun getCompletedTaskCount(): Flow<Resource<Int>>
     
@@ -30,5 +32,7 @@ interface TaskRepository {
     suspend fun deleteAllTasks(): Resource<Unit>
     
     // Sync operations
-    fun getLastSyncTimeFlow(): Flow<String?>
+    fun getFormatedLastSyncTime(): Flow<String?>
+
+    fun getLastSyncTimestamp(): Flow<Long?>
 }
