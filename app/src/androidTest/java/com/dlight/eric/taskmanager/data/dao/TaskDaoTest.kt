@@ -1,8 +1,9 @@
-package com.dlight.eric.taskmanager.data.local.dao
+package com.dlight.eric.taskmanager.data.dao
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.dlight.eric.taskmanager.data.local.dao.TaskDao
 import com.dlight.eric.taskmanager.data.local.database.AppDatabase
 import com.dlight.eric.taskmanager.data.local.entities.TaskEntity
 import kotlinx.coroutines.flow.first

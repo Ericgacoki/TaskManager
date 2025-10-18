@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -242,7 +243,10 @@ fun TaskDetailScreenContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.testTag("back")
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Back"
@@ -259,7 +263,10 @@ fun TaskDetailScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (uiState.showEdit) {
-                        IconButton(onClick = onEditClick) {
+                        IconButton(
+                            onClick = onEditClick,
+                            modifier = Modifier.testTag("edit")
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_edit),
                                 contentDescription = "Edit"
@@ -430,6 +437,7 @@ fun TaskDetailScreenContent(
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
+                            .testTag("title")
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -441,6 +449,7 @@ fun TaskDetailScreenContent(
                         minLines = 4,
                         maxLines = 10,
                         modifier = Modifier.fillMaxWidth()
+                            .testTag("description")
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -521,7 +530,7 @@ fun TaskDetailScreenContent(
                         Button(
                             onClick = onSaveClick,
                             enabled = uiState.canSave && !uiState.isSaving,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).testTag("save")
                         ) {
                             if (uiState.isSaving) {
                                 CircularProgressIndicator(

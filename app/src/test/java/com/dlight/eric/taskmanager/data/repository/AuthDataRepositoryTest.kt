@@ -5,6 +5,7 @@ import com.dlight.eric.taskmanager.data.remote.api.AuthApiService
 import com.dlight.eric.taskmanager.domain.model.User
 import com.dlight.eric.taskmanager.utils.Resource
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -117,7 +118,9 @@ class AuthDataRepositoryTest {
 
     @Test
     fun `should return error when getting token throws exception`() = runTest {
-        whenever(appDataStore.authToken).thenThrow(RuntimeException("DataStore error"))
+        whenever(appDataStore.authToken).thenReturn(
+            flow { throw RuntimeException("DataStore error") }
+        )
 
         val result = repository.getLoggedInUserToken().first()
 

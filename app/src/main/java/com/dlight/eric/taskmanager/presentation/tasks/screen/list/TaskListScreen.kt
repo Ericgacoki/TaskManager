@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -128,6 +129,7 @@ fun TaskListContent(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
+                        modifier = Modifier.testTag("tasks"),
                         text = "Tasks",
                         style = MaterialTheme.typography.headlineMedium
                     )
@@ -167,7 +169,8 @@ fun TaskListContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onClickAddTask
+                onClick = onClickAddTask,
+                modifier = Modifier.testTag("add_task")
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

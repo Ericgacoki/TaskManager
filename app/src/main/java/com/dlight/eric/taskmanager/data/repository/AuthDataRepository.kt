@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
 
@@ -52,10 +53,11 @@ class AuthDataRepository @Inject constructor(
         dataStore.clearAuthData()
     }
 
-    override fun getLoggedInUserToken() = flow<Resource<String?>> {
-        val token = dataStore.authToken.first()
-        emit(Resource.Success(token))
-    }.catch { e ->
-        emit(Resource.Error(e.message ?: "Failed to get auth token"))
-    }
+    override fun getLoggedInUserToken(): Flow<Resource<String?>> = dataStore.authToken
+        .map { token ->
+            Resource.Success(token) as Resource<String?>
+        }
+        .catch { e ->
+            emit(Resource.Error<String?>(e.message ?: "Failed to get auth token"))
+        }
 }
