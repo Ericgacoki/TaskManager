@@ -1,4 +1,4 @@
-package com.dlight.eric.taskmanager.data.mappers
+package com.dlight.eric.taskmanager.data.mapper
 
 import com.dlight.eric.taskmanager.data.local.entities.TaskEntity
 import com.dlight.eric.taskmanager.data.remote.dto.TaskDto

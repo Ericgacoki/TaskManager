@@ -1,9 +1,8 @@
-package com.dlight.eric.taskmanager.data.mappers
+package com.dlight.eric.taskmanager.data.mapper
 
-import com.dlight.eric.taskmanager.data.local.entities.TaskEntity
-import com.dlight.eric.taskmanager.data.mappers.TaskMapper.toDomain
-import com.dlight.eric.taskmanager.data.mappers.TaskMapper.toDto
-import com.dlight.eric.taskmanager.data.mappers.TaskMapper.toEntity
+import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toDomain
+import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toDto
+import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toEntity
 import com.dlight.eric.taskmanager.data.remote.dto.TaskDto
 import com.dlight.eric.taskmanager.domain.model.Task
 import org.junit.Assert.assertEquals
