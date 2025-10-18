@@ -2,8 +2,8 @@ package com.dlight.eric.taskmanager.data.repository
 
 import com.dlight.eric.taskmanager.data.datastore.AppDataStore
 import com.dlight.eric.taskmanager.data.local.dao.TaskDao
-import com.dlight.eric.taskmanager.data.mappers.TaskMapper.toDomain
-import com.dlight.eric.taskmanager.data.mappers.TaskMapper.toEntity
+import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toDomain
+import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toEntity
 import com.dlight.eric.taskmanager.domain.model.Task
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.utils.DateUtils

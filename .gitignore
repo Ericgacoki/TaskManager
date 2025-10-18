@@ -17,3 +17,4 @@ CLAUDE.md
 db.json
 node_modules/
 secrets.properties
+/.kotlin/errors/

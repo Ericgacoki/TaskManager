@@ -9,8 +9,10 @@ import com.dlight.eric.taskmanager.domain.repository.AuthRepository
 import com.dlight.eric.taskmanager.utils.Resource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
 
@@ -24,42 +26,38 @@ class AuthDataRepository @Inject constructor(
         return call(token)
     }
 
-    override fun login(email: String): Flow<Resource<User>> = flow {
-        try {
-            emit(Resource.Loading())
+    override fun login(email: String, useApi: Boolean): Flow<Resource<User>> = flow {
+        emit(Resource.Loading())
 
-            // Mock authentication with 5 second delay...
+        val response = if (useApi) {
+            // Real API calls used in tests
+            val request = LoginRequest(email = email)
+            authApiService.login(request)
+        } else {
+            // Mock auth with delay for regular usage...
             delay(5000L)
-            
-            // Generate mock token
             val mockToken = "mock-token-${UUID.randomUUID()}"
-            val response = LoginResponse(token = mockToken)
-            
-            // real API calls
-            // val request = LoginRequest(email = email)
-            // val response = authApiService.login(request)
-
-            // Save auth data
-            response.token?.let { dataStore.saveAuthToken(it) }
-            dataStore.saveUserEmail(email)
-
-            val user = User(email = email)
-            emit(Resource.Success(user))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Login failed"))
+            LoginResponse(token = mockToken)
         }
+
+        // Save auth data
+        response.token?.let { dataStore.saveAuthToken(it) }
+
+        val user = User(email = email)
+        emit(Resource.Success(user))
+    }.catch { e ->
+        emit(Resource.Error(e.message ?: "Login failed"))
     }
 
     override suspend fun logout() {
         dataStore.clearAuthData()
     }
 
-    override fun getLoggedInUserToken(): Flow<Resource<String?>> = flow {
-        try {
-            val token = dataStore.authToken.first()
-            emit(Resource.Success(token))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Failed to get auth token"))
+    override fun getLoggedInUserToken(): Flow<Resource<String?>> = dataStore.authToken
+        .map { token ->
+            Resource.Success(token) as Resource<String?>
         }
-    }
+        .catch { e ->
+            emit(Resource.Error<String?>(e.message ?: "Failed to get auth token"))
+        }
 }

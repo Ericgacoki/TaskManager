@@ -100,7 +100,7 @@ class AuthViewModel @Inject constructor(
 
     private fun retry() {
         _authUiState.value = _authUiState.value.copy(error = AuthError.None)
-        login() // again 😸
+        login() // again haha 😸
     }
 
     private fun clearError() {

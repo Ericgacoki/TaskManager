@@ -11,6 +11,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -96,7 +97,8 @@ fun LoginScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .testTag("email"),
                 enabled = !uiState.isLoading
             )
 
@@ -111,7 +113,8 @@ fun LoginScreenContent(
                     Text(
                         text = uiState.error.message,
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.testTag("login_error_text")
                     )
                 }
             }
@@ -119,7 +122,9 @@ fun LoginScreenContent(
             Button(
                 onClick = onLoginClick,
                 enabled = !uiState.isLoading && uiState.error !is AuthError.InputError,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("log_in")
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
