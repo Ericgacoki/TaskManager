@@ -1,6 +1,7 @@
 package com.dlight.eric.taskmanager.di
 
 import com.dlight.eric.taskmanager.data.remote.api.AuthApiService
+import com.dlight.eric.taskmanager.data.remote.api.TaskApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,5 +48,11 @@ object NetworkModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideTaskApiService(retrofit: Retrofit): TaskApiService {
+        return retrofit.create(TaskApiService::class.java)
     }
 }
