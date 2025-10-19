@@ -2,7 +2,9 @@ package com.dlight.eric.taskmanager.di
 
 import com.dlight.eric.taskmanager.data.repository.AuthDataRepository
 import com.dlight.eric.taskmanager.data.repository.TaskDataRepository
+import com.dlight.eric.taskmanager.data.sync.SyncManager
 import com.dlight.eric.taskmanager.domain.repository.AuthRepository
+import com.dlight.eric.taskmanager.domain.repository.SyncRepository
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
@@ -22,4 +24,9 @@ abstract class RepositoryModule {
     abstract fun bindTaskRepository(
         taskDataRepository: TaskDataRepository
     ): TaskRepository
+    
+    @Binds
+    abstract fun bindSyncRepository(
+        syncManager: SyncManager
+    ): SyncRepository
 }

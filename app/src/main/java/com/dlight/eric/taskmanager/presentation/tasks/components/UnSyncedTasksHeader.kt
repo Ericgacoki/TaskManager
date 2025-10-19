@@ -14,11 +14,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dlight.eric.taskmanager.R
@@ -26,7 +28,8 @@ import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
 
 @Composable
 fun UnSyncedTasksHeader(
-    unSyncedCount: Int
+    unSyncedCount: Int,
+    onSyncClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -41,20 +44,35 @@ fun UnSyncedTasksHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_cloud_off),
-                contentDescription = "UnSynced",
-                modifier = Modifier.size(20.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_cloud_off),
+                    contentDescription = "UnSynced",
+                    modifier = Modifier.size(20.dp)
+                )
 
-            Text(
-                text = "$unSyncedCount ${if (unSyncedCount == 1) "Task" else "Tasks"} not synced",
-                style = MaterialTheme.typography.bodyMedium
-            )
+                Text(
+                    text = "$unSyncedCount ${if (unSyncedCount == 1) "Task" else "Tasks"} not synced",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            
+            TextButton(
+                onClick = onSyncClick
+            ) {
+                Text(
+                    text = "Sync",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
@@ -63,6 +81,6 @@ fun UnSyncedTasksHeader(
 @Composable
 private fun UnSyncedTasksHeaderPreview() {
     TaskManagerTheme(dynamicColor = false) {
-        UnSyncedTasksHeader(unSyncedCount = 3)
+        UnSyncedTasksHeader(unSyncedCount = 3, onSyncClick = {})
     }
 }

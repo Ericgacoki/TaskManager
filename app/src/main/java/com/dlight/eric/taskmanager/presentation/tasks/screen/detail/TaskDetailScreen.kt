@@ -65,6 +65,7 @@ import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
 import com.dlight.eric.taskmanager.utils.DateUtils
 import com.dlight.eric.taskmanager.utils.TaskAction
 import com.dlight.eric.taskmanager.utils.TaskMode
+import java.util.Calendar
 
 @Composable
 fun TaskDetailScreen(
@@ -198,11 +199,11 @@ fun TaskDetailScreenContent(
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 // Only allow selecting today or future dates
-                val calendar = java.util.Calendar.getInstance()
-                calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
-                calendar.set(java.util.Calendar.MINUTE, 0)
-                calendar.set(java.util.Calendar.SECOND, 0)
-                calendar.set(java.util.Calendar.MILLISECOND, 0)
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
 
                 val todayStart = calendar.timeInMillis
                 return utcTimeMillis >= todayStart
@@ -436,7 +437,8 @@ fun TaskDetailScreenContent(
                                 )
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .testTag("title")
                     )
 
@@ -448,7 +450,8 @@ fun TaskDetailScreenContent(
                         label = { Text("Description (optional)") },
                         minLines = 4,
                         maxLines = 10,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .testTag("description")
                     )
 
@@ -530,7 +533,9 @@ fun TaskDetailScreenContent(
                         Button(
                             onClick = onSaveClick,
                             enabled = uiState.canSave && !uiState.isSaving,
-                            modifier = Modifier.weight(1f).testTag("save")
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("save")
                         ) {
                             if (uiState.isSaving) {
                                 CircularProgressIndicator(

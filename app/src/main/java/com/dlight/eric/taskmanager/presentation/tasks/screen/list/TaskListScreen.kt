@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dlight.eric.taskmanager.R
 import com.dlight.eric.taskmanager.domain.model.Task
 import com.dlight.eric.taskmanager.presentation.tasks.components.TaskItem
@@ -80,7 +81,8 @@ fun TaskListScreen(
             viewModel.onEvent(TaskEvent.LogOut)
             onLogOut()
         },
-        onPullToRefresh = { viewModel.onEvent(TaskEvent.PullToRefresh) }
+        onPullToRefresh = { viewModel.onEvent(TaskEvent.PullToRefresh) },
+        onTriggerSync = { viewModel.onEvent(TaskEvent.TriggerSync) }
     )
 }
 
@@ -95,7 +97,8 @@ fun TaskListContent(
     onRetry: () -> Unit,
     onDeleteAll: () -> Unit,
     onLogOut: () -> Unit,
-    onPullToRefresh: () -> Unit
+    onPullToRefresh: () -> Unit,
+    onTriggerSync: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
@@ -254,7 +257,8 @@ fun TaskListContent(
                         if (uiState.unSyncedTaskCount > 0) {
                             stickyHeader {
                                 UnSyncedTasksHeader(
-                                    unSyncedCount = uiState.unSyncedTaskCount
+                                    unSyncedCount = uiState.unSyncedTaskCount,
+                                    onSyncClick = onTriggerSync
                                 )
                             }
                         }
@@ -348,7 +352,8 @@ fun TaskListEmptyPreview() {
                 onRetry = {},
                 onDeleteAll = {},
                 onLogOut = {},
-                onPullToRefresh = {}
+                onPullToRefresh = {},
+                onTriggerSync = {}
             )
         }
     }
@@ -401,7 +406,8 @@ fun TaskListContentPreview() {
             onRetry = {},
             onDeleteAll = {},
             onLogOut = {},
-            onPullToRefresh = {}
+            onPullToRefresh = {},
+            onTriggerSync = {}
         )
     }
 }
@@ -423,7 +429,8 @@ fun TaskListErrorPreview() {
             onRetry = {},
             onDeleteAll = {},
             onLogOut = {},
-            onPullToRefresh = {}
+            onPullToRefresh = {},
+            onTriggerSync = {}
         )
     }
 }

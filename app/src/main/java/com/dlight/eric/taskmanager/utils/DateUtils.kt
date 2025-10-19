@@ -17,7 +17,10 @@ object DateUtils {
             System.currentTimeMillis()
         }
     }
-    
+
+    /**
+     * This returns a date in the format "2025-10-06T09:30:00Z"
+     * */
     fun formatToIsoString(timestamp: Long): String {
         return isoFormat.format(Date(timestamp))
     }

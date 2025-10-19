@@ -3,6 +3,7 @@ package com.dlight.eric.taskmanager.presentation.tasks.screen.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dlight.eric.taskmanager.domain.repository.AuthRepository
+import com.dlight.eric.taskmanager.domain.repository.SyncRepository
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
@@ -22,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val syncRepository: SyncRepository
 ) : ViewModel() {
 
     private val _tasksUiState = MutableStateFlow(TaskListUiState())
@@ -47,6 +49,7 @@ class TaskListViewModel @Inject constructor(
             is TaskEvent.LogOut -> logOut()
             is TaskEvent.PullToRefresh -> pullToRefresh()
             is TaskEvent.Retry -> retry()
+            is TaskEvent.TriggerSync -> triggerSync()
         }
     }
 
@@ -179,6 +182,15 @@ class TaskListViewModel @Inject constructor(
 
     private fun retry() {
         loadTasks()
+    }
+    
+    private fun triggerSync() {
+        viewModelScope.launch {
+            try {
+                syncRepository.triggerSync()
+                // No need to hard-refresh because data collectors are reactive
+            } catch (_: Exception) { }
+        }
     }
 }
 

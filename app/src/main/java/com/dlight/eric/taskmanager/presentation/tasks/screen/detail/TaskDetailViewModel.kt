@@ -7,9 +7,9 @@ import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskDetailEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskDetailError
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskDetailState
-import com.dlight.eric.taskmanager.utils.TaskAction
 import com.dlight.eric.taskmanager.utils.DateUtils
 import com.dlight.eric.taskmanager.utils.Resource
+import com.dlight.eric.taskmanager.utils.TaskAction
 import com.dlight.eric.taskmanager.utils.TaskMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
@@ -50,14 +51,23 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun createEmptyTask(): Task {
+        // Get today's date at 00:00:00
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val today = calendar.timeInMillis
+
         return Task(
             id = UUID.randomUUID().toString(),
             title = "",
             description = "",
             completed = false,
-            dueDate = DateUtils.formatToIsoString(System.currentTimeMillis()),
-            createdAt = DateUtils.formatTimestamp(System.currentTimeMillis()),
-            updatedAt = DateUtils.formatTimestamp(System.currentTimeMillis())
+            dueDate = DateUtils.formatToIsoString(today),
+            createdAt = DateUtils.formatTimestamp(today),
+            updatedAt = DateUtils.formatTimestamp(today)
         )
     }
 
@@ -85,7 +95,7 @@ class TaskDetailViewModel @Inject constructor(
     private fun loadTask(taskId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = TaskDetailError.None) }
-            
+
             taskRepository.getTaskById(taskId)
                 .collect { resource ->
                     when (resource) {
@@ -96,7 +106,7 @@ class TaskDetailViewModel @Inject constructor(
                         is Resource.Success -> {
                             val task = resource.data
                             if (task != null) {
-                                _uiState.update { 
+                                _uiState.update {
                                     it.copy(
                                         updatedTask = task,
                                         originalTask = task,
@@ -156,9 +166,9 @@ class TaskDetailViewModel @Inject constructor(
 
     private fun saveTask() {
         val currentTask = _uiState.value.updatedTask ?: return
-        
+
         if (currentTask.title.isBlank()) {
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
                     error = TaskDetailError.InputError("Task title cannot be empty")
                 )
@@ -168,7 +178,7 @@ class TaskDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = TaskDetailError.None) }
-            
+
             // Update timestamp for all save operations (CREATE and EDIT)
             val taskToSave = when (_uiState.value.taskMode) {
                 TaskMode.CREATE, TaskMode.EDIT -> {
@@ -181,24 +191,26 @@ class TaskDetailViewModel @Inject constructor(
 
                 TaskMode.VIEW -> currentTask
             }
-            
+
             // Update UI state with the timestamped task before saving
             if (_uiState.value.taskMode != TaskMode.VIEW) {
                 _uiState.update { it.copy(updatedTask = taskToSave) }
             }
-            
+
             val result = when (_uiState.value.taskMode) {
                 TaskMode.CREATE -> {
                     taskRepository.insertTask(taskToSave)
                 }
+
                 TaskMode.EDIT -> {
                     taskRepository.updateTask(taskToSave)
                 }
+
                 TaskMode.VIEW -> {
                     Resource.Success(Unit)
                 }
             }
-            
+
             when (result) {
                 is Resource.Success -> {
                     // After successful save, update the original task reference
@@ -211,8 +223,9 @@ class TaskDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Error -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isSaving = false,
                             isLoading = false,
@@ -220,6 +233,7 @@ class TaskDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Loading -> {}
             }
         }
@@ -229,7 +243,7 @@ class TaskDetailViewModel @Inject constructor(
         if (_uiState.value.taskMode == TaskMode.CREATE) {
             return
         }
-        
+
         val currentTask = _uiState.value.updatedTask ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = TaskDetailError.None) }
@@ -237,7 +251,7 @@ class TaskDetailViewModel @Inject constructor(
             when (val result = taskRepository.deleteTask(currentTask)) {
                 is Resource.Success -> {
                     // After successful delete, signal navigation back
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isSaving = false,
                             isLoading = false,
@@ -246,14 +260,16 @@ class TaskDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Error -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isSaving = false,
                             error = TaskDetailError.LoadError(result.message ?: "Unknown error")
                         )
                     }
                 }
+
                 is Resource.Loading -> {}
             }
         }
@@ -278,9 +294,11 @@ class TaskDetailViewModel @Inject constructor(
             TaskMode.CREATE -> {
                 _uiState.update { it.copy(autoNavigateBack = true) }
             }
+
             TaskMode.EDIT -> {
                 _uiState.update { it.copy(taskMode = TaskMode.VIEW) }
             }
+
             TaskMode.VIEW -> {
                 // Never gonna happen...
             }
@@ -289,14 +307,14 @@ class TaskDetailViewModel @Inject constructor(
 
     private fun toggleTaskCompletion(isCompleted: Boolean) {
         val currentTask = _uiState.value.updatedTask ?: return
-        
+
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = TaskDetailError.None) }
-            
+
             when (val result = taskRepository.updateTaskCompletion(currentTask.id, isCompleted)) {
                 is Resource.Success -> {
                     val updatedTask = currentTask.copy(completed = isCompleted)
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             updatedTask = updatedTask,
                             originalTask = updatedTask,
@@ -305,14 +323,18 @@ class TaskDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Error -> {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isSaving = false,
-                            error = TaskDetailError.LoadError(result.message ?: "Failed to update task")
+                            error = TaskDetailError.LoadError(
+                                result.message ?: "Failed to update task"
+                            )
                         )
                     }
                 }
+
                 is Resource.Loading -> {}
             }
         }
