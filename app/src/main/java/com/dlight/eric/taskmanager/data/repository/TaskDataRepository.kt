@@ -23,9 +23,7 @@ class TaskDataRepository @Inject constructor(
                 val tasks = entities.map { it.toDomain() }
                 Resource.Success(tasks) as Resource<List<Task>>
             }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to load tasks"))
-            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to load tasks")) }
 
     override fun getTaskById(id: String): Flow<Resource<Task?>> =
         taskDao.getTaskById(id)
@@ -33,9 +31,7 @@ class TaskDataRepository @Inject constructor(
                 val task = entity?.toDomain()
                 Resource.Success(task) as Resource<Task?>
             }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to load task"))
-            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to load task")) }
 
     override suspend fun insertTask(task: Task): Resource<Unit> {
         return try {
@@ -105,18 +101,12 @@ class TaskDataRepository @Inject constructor(
             .map { count ->
                 Resource.Success(count) as Resource<Int>
             }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to get task count"))
-            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get task count")) }
 
     override fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>> =
         taskDao.getUnSyncedTaskCount(lastSyncTimestamp)
-            .map { count ->
-                Resource.Success(count) as Resource<Int>
-            }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to get task count"))
-            }
+            .map { count -> Resource.Success(count) as Resource<Int> }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get task count")) }
 
     override fun getUnSyncedTasks(lastSyncTimestamp: Long): Flow<Resource<List<Task>>> =
         taskDao.getUnSyncedTasks(lastSyncTimestamp)
@@ -124,18 +114,14 @@ class TaskDataRepository @Inject constructor(
                 val tasks = entities.map { it.toDomain() }
                 Resource.Success(tasks) as Resource<List<Task>>
             }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to get unsynced tasks"))
-            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get unsynced tasks")) }
 
     override fun getCompletedTaskCount(): Flow<Resource<Int>> =
         taskDao.getCompletedTaskCount()
             .map { count ->
                 Resource.Success(count) as Resource<Int>
             }
-            .catch { e ->
-                emit(Resource.Error(e.message ?: "Failed to get completed task count"))
-            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get completed task count")) }
 
     override suspend fun deleteAllTasks(): Resource<Unit> {
         return try {
@@ -156,9 +142,7 @@ class TaskDataRepository @Inject constructor(
                     null
                 }
             }
-            .catch {
-                emit(null)
-            }
+            .catch { emit(null) }
 
     override fun getLastSyncTimestamp(): Flow<Long?> = appDataStore.lastSyncTime
 }
