@@ -1,9 +1,9 @@
 package com.dlight.eric.taskmanager.presentation.tasks.screen.list
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo.State.FAILED
 import androidx.work.WorkInfo.State.RUNNING
 import androidx.work.WorkInfo.State.SUCCEEDED
 import androidx.work.WorkManager
@@ -247,19 +247,18 @@ class TaskListViewModel @Inject constructor(
                                 }
                             }
 
-                            FAILED -> {
-                                val errorMessage = info.outputData.getString("error_message")
-                                    ?: "Sync failed"
+                            else -> {
+                                val errorMessage =
+                                    info.outputData.getString("error_message")
+                                        ?: "Sync failed"
                                 _tasksUiState.update {
                                     it.copy(
                                         syncState = SyncState.FAILED,
                                         syncError = errorMessage
                                     )
                                 }
-                            }
 
-                            else -> {
-                                // ENQUEUED, BLOCKED, CANCELLED - keep current state
+                                Log.e("WORK OBSERVER", "FAILED WITH: $errorMessage")
                             }
                         }
                     }
