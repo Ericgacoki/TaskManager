@@ -16,5 +16,6 @@ CLAUDE.md
 *.keystore
 db.json
 node_modules/
+server/package-lock.json
 secrets.properties
 /.kotlin/errors/
