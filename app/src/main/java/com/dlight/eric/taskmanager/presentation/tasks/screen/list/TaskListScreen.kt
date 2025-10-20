@@ -375,8 +375,8 @@ fun TaskListContentPreview() {
                         title = "Buy groceries",
                         description = "Milk, eggs, bread",
                         completed = false,
-                        createdAt = "Today",
-                        updatedAt = "2 hours ago",
+                        createdAt = "2025-01-19T08:00:00Z",
+                        updatedAt = "2025-01-19T14:00:00Z",
                         dueDate = "Today"
                     ),
                     Task(
@@ -384,8 +384,8 @@ fun TaskListContentPreview() {
                         title = "Complete project",
                         description = "Finish the Android app for d.Light",
                         completed = false,
-                        createdAt = "Yesterday",
-                        updatedAt = "1 hour ago",
+                        createdAt = "2025-01-18T10:00:00Z",
+                        updatedAt = "2025-01-18T16:00:00Z",
                         dueDate = "Today"
                     ),
                     Task(
@@ -393,8 +393,8 @@ fun TaskListContentPreview() {
                         title = "Call mom",
                         description = "Weekly check-in call",
                         completed = true,
-                        createdAt = "2 days ago",
-                        updatedAt = "Yesterday",
+                        createdAt = "2025-01-17T09:00:00Z",
+                        updatedAt = "2025-01-18T11:30:00Z",
                         dueDate = "Today"
                     )
                 )

@@ -51,9 +51,9 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun createEmptyTask(): Task {
-        // Get today's date at 00:00:00
+        // Get today's date at 12:00 PM to avoid timezone edge cases
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.HOUR_OF_DAY, 12)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
@@ -66,8 +66,8 @@ class TaskDetailViewModel @Inject constructor(
             description = "",
             completed = false,
             dueDate = DateUtils.formatToIsoString(today),
-            createdAt = DateUtils.formatTimestamp(today),
-            updatedAt = DateUtils.formatTimestamp(today)
+            createdAt = DateUtils.formatToIsoString(today),
+            updatedAt = DateUtils.formatToIsoString(today)
         )
     }
 
@@ -185,7 +185,7 @@ class TaskDetailViewModel @Inject constructor(
                     currentTask.copy(
                         title = currentTask.title.trim(),
                         description = currentTask.description.trim(),
-                        updatedAt = DateUtils.formatTimestamp(System.currentTimeMillis())
+                        updatedAt = DateUtils.formatToIsoString(System.currentTimeMillis())
                     )
                 }
 

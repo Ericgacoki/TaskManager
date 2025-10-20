@@ -1,6 +1,7 @@
 package com.dlight.eric.taskmanager.data.sync
 
 import android.content.Context
+import android.util.Log
 import com.dlight.eric.taskmanager.data.datastore.AppDataStore
 import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toDomain
 import com.dlight.eric.taskmanager.data.mapper.TaskMapper.toDto
@@ -12,6 +13,7 @@ import com.dlight.eric.taskmanager.utils.DateUtils
 import com.dlight.eric.taskmanager.utils.Resource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -30,10 +32,10 @@ class SyncManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SyncRepository {
 
-    override suspend fun syncTasks(): Flow<Resource<Unit>> = flow {
-        try {
-            emit(Resource.Loading())
+    override suspend fun syncTasks() = flow<Resource<Unit>> {
+        emit(Resource.Loading())
 
+        runCatching {
             // Capture sync start time
             val syncStartTime = System.currentTimeMillis()
             val lastSyncTime = taskRepository.getLastSyncTimestamp().first()
@@ -44,31 +46,37 @@ class SyncManager @Inject constructor(
                     .first { it !is Resource.Loading }
 
                 if (localUnsyncedResult !is Resource.Success) {
-                    emit(Resource.Error("Failed to get unsynced local tasks"))
+                    val error = "Failed to get unsynced local tasks: ${localUnsyncedResult.message}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
-                localUnsyncedResult.data ?: emptyList()
+                val tasks = localUnsyncedResult.data ?: emptyList()
+                tasks
             } else {
                 // First local sync... get all tasks
                 val allTasksResult = taskRepository.getAllTasks()
                     .first { it !is Resource.Loading }
 
                 if (allTasksResult !is Resource.Success) {
-                    emit(Resource.Error("Failed to get local tasks"))
+                    val error = "Failed to get local tasks: ${allTasksResult.message}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
-                allTasksResult.data ?: emptyList()
+                val tasks = allTasksResult.data ?: emptyList()
+                tasks
             }
 
             // STEP 2: Get unsynced tasks from server
             val allServerTasksResult = getServerTasks()
                 .first { it !is Resource.Loading }
             if (allServerTasksResult !is Resource.Success) {
-                emit(Resource.Error(allServerTasksResult.message ?: "Failed to fetch server tasks"))
+                val error = allServerTasksResult.message ?: "Failed to fetch server tasks"
+                emit(Resource.Error(error))
                 return@flow
             }
 
             val allServerTasks = allServerTasksResult.data ?: emptyList()
+            
             val serverUnsyncedTasks = if (lastSyncTime != null) {
                 // Mock timestamp filtering since json-server doesn't custom queries
                 allServerTasks.filter { serverTask ->
@@ -83,19 +91,18 @@ class SyncManager @Inject constructor(
             val localTaskIds = localUnsynced.map { it.id }.toSet()
             val serverOnly = serverUnsyncedTasks.filter { it.id !in localTaskIds }
 
-            // STEP 4: Find local-only tasks  
-            val serverTaskIds = serverUnsyncedTasks.map { it.id }.toSet()
-            val localOnly = localUnsynced.filter { it.id !in serverTaskIds }
+            // STEP 4: Find local-only tasks (not on server at all)
+            val allServerTaskIds = allServerTasks.map { it.id }.toSet()
+            val localOnly = localUnsynced.filter { it.id !in allServerTaskIds }
 
-            // STEP 5: Find conflicting tasks
+            // STEP 5: Find conflicting tasks (exist on both local and server)
             val conflicts = localUnsynced.filter { localTask ->
-                serverUnsyncedTasks.any { serverTask -> serverTask.id == localTask.id }
+                allServerTasks.any { serverTask -> serverTask.id == localTask.id }
             }
 
             // STEP 6: Resolve conflicts (latest updatedAt wins)
-            // This low-key takes advantage of that we can not have two tasks with same id.
             val conflictResolutions = conflicts.map { localTask ->
-                val serverTask = serverUnsyncedTasks.first { it.id == localTask.id }
+                val serverTask = allServerTasks.first { it.id == localTask.id }
                 val serverUpdatedAt = DateUtils.parseIsoString(serverTask.updatedAt)
                 val localUpdatedAt = DateUtils.parseIsoString(localTask.updatedAt)
 
@@ -111,16 +118,19 @@ class SyncManager @Inject constructor(
             if (serverOnly.isNotEmpty()) {
                 val insertResult = taskRepository.insertTasks(serverOnly)
                 if (insertResult !is Resource.Success) {
-                    emit(Resource.Error(insertResult.message ?: "Failed to save server tasks"))
+                    val error = "Failed to save server tasks: ${insertResult.message}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
             }
 
             // Save server winners from conflicts
-            conflictResolutions.filterIsInstance<ConflictResult.ServerWins>().forEach { result ->
+            val serverWinners = conflictResolutions.filterIsInstance<ConflictResult.ServerWins>()
+            serverWinners.forEach { result ->
                 val updateResult = taskRepository.updateTask(result.task)
                 if (updateResult !is Resource.Success) {
-                    emit(Resource.Error("Failed to update task ${result.task.id}"))
+                    val error = "Failed to update task ${result.task.id}: ${updateResult.message}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
             }
@@ -131,25 +141,20 @@ class SyncManager @Inject constructor(
                 val createResult = createServerTask(localTask)
                     .first { it !is Resource.Loading }
                 if (createResult !is Resource.Success) {
-                    emit(
-                        Resource.Error(
-                            createResult.message ?: "Failed to create task ${localTask.id}"
-                        )
-                    )
+                    val error = createResult.message ?: "Failed to create task ${localTask.id}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
             }
 
             // Upload local winners from conflicts
-            conflictResolutions.filterIsInstance<ConflictResult.LocalWins>().forEach { result ->
+            val localWinners = conflictResolutions.filterIsInstance<ConflictResult.LocalWins>()
+            localWinners.forEach { result ->
                 val updateResult = updateServerTask(result.task)
                     .first { it !is Resource.Loading }
                 if (updateResult !is Resource.Success) {
-                    emit(
-                        Resource.Error(
-                            updateResult.message ?: "Failed to update task ${result.task.id}"
-                        )
-                    )
+                    val error = updateResult.message ?: "Failed to update task ${result.task.id}"
+                    emit(Resource.Error(error))
                     return@flow
                 }
             }
@@ -157,10 +162,11 @@ class SyncManager @Inject constructor(
             // STEP 9: Update sync time
             appDataStore.saveLastSyncTime(syncStartTime)
 
+        }.onSuccess {
             emit(Resource.Success(Unit))
-
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Sync failed"))
+        }.onFailure { e ->
+            val errorMsg = "Sync failed: ${e.message}"
+            emit(Resource.Error(errorMsg))
         }
     }
 
@@ -168,35 +174,32 @@ class SyncManager @Inject constructor(
         SyncWorker.enqueueImmediateSync(context)
     }
 
-    override fun getServerTasks(): Flow<Resource<List<Task>>> = flow {
-        try {
-            val serverTasks = taskApiService.getTasks()
-            val domainTasks = serverTasks.map { it.toDomain() }
-            emit(Resource.Success(domainTasks))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Failed to fetch server tasks"))
-        }
+    override fun getServerTasks() = flow<Resource<List<Task>>> {
+        val serverTasks = taskApiService.getTasks()
+        val domainTasks = serverTasks.map { it.toDomain() }
+        emit(Resource.Success(domainTasks))
+    }.catch { e ->
+        val error = "Failed to fetch server tasks: ${e.message}"
+        emit(Resource.Error<List<Task>>(error))
     }
 
-    override fun createServerTask(task: Task): Flow<Resource<Task>> = flow {
-        try {
-            val taskDto = task.toDto()
-            val createdTaskDto = taskApiService.createTask(taskDto)
-            val createdTask = createdTaskDto.toDomain()
-            emit(Resource.Success(createdTask))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Failed to create server task"))
-        }
+    override fun createServerTask(task: Task) = flow<Resource<Task>> {
+        val taskDto = task.toDto()
+        val createdTaskDto = taskApiService.createTask(taskDto)
+        val createdTask = createdTaskDto.toDomain()
+        emit(Resource.Success(createdTask))
+    }.catch { e ->
+        val error = "Failed to create server task: ${e.message}"
+        emit(Resource.Error<Task>(error))
     }
 
-    override fun updateServerTask(task: Task): Flow<Resource<Task>> = flow {
-        try {
-            val taskDto = task.toDto()
-            val updatedTaskDto = taskApiService.updateTask(task.id, taskDto)
-            val updatedTask = updatedTaskDto.toDomain()
-            emit(Resource.Success(updatedTask))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Failed to update server task"))
-        }
+    override fun updateServerTask(task: Task) = flow<Resource<Task>> {
+        val taskDto = task.toDto()
+        val updatedTaskDto = taskApiService.updateTask(task.id, taskDto)
+        val updatedTask = updatedTaskDto.toDomain()
+        emit(Resource.Success(updatedTask))
+    }.catch { e ->
+        val error = "Failed to update server task: ${e.message}"
+        emit(Resource.Error<Task>(error))
     }
 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.dlight.eric.taskmanager.R
 import com.dlight.eric.taskmanager.domain.model.Task
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
+import com.dlight.eric.taskmanager.utils.DateUtils
 
 @Composable
 fun TaskItem(
@@ -48,6 +49,10 @@ fun TaskItem(
     onItemClick: (taskId: String) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val readableDate = remember(task.updatedAt) {
+        DateUtils.formatToReadableDate(task.updatedAt)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,7 +167,7 @@ fun TaskItem(
                 )
 
                 Text(
-                    text = task.updatedAt,
+                    text = readableDate,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp
@@ -191,8 +196,8 @@ fun TaskItemPreview() {
                         title = "Buy groceries for the week including fruits and vegetables",
                         description = "Need to get milk, eggs, bread, apples, spinach, and other essentials for the upcoming week",
                         completed = false,
-                        createdAt = "Today",
-                        updatedAt = "2 hours ago",
+                        createdAt = "2025-01-19T08:00:00Z",
+                        updatedAt = "2025-01-19T14:00:00Z",
                         dueDate = "Today"
                     ),
                     onEditClick = { },
@@ -208,8 +213,8 @@ fun TaskItemPreview() {
                         title = "Complete project documentation",
                         description = "",
                         completed = true,
-                        createdAt = "Yesterday",
-                        updatedAt = "Yesterday",
+                        createdAt = "2025-01-18T10:00:00Z",
+                        updatedAt = "2025-01-18T16:00:00Z",
                         dueDate = "Today"
                     ),
                     onEditClick = {},
@@ -225,8 +230,8 @@ fun TaskItemPreview() {
                         title = "This is a very long task title that should be truncated with ellipsis when it exceeds the available space",
                         description = "Short description here",
                         completed = false,
-                        createdAt = "Last week",
-                        updatedAt = "Thur July 10",
+                        createdAt = "2025-01-12T09:00:00Z",
+                        updatedAt = "2025-01-17T11:30:00Z",
                         dueDate = "Today"
                     ),
                     onEditClick = {},

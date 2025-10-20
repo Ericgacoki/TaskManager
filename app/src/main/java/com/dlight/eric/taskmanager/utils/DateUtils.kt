@@ -10,6 +10,9 @@ object DateUtils {
         timeZone = TimeZone.getTimeZone("UTC")
     }
 
+    /**
+     * This formats "2025-10-06T09:30:00Z" to a timeStamp "1759810200000" in Millis
+     * */
     fun parseIsoString(dateString: String): Long {
         return try {
             isoFormat.parse(dateString)?.time ?: System.currentTimeMillis()
@@ -26,7 +29,7 @@ object DateUtils {
     }
     
     /**
-     * Formats a timestamp to a string
+     * Formats "2025-10-06T09:30:00Z" to a more human-friendly format
      * 
      * Examples:
      * - "Just now" (< 1 minute)
@@ -35,7 +38,9 @@ object DateUtils {
      * - "3 days ago"
      * - "Jul 10, 2025" (> 1 week)
      */
-    fun formatTimestamp(timestamp: Long): String {
+
+    fun formatToReadableDate(isoString: String): String {
+        val timestamp = parseIsoString(isoString)
         val now = System.currentTimeMillis()
         val diff = now - timestamp
 
@@ -61,7 +66,7 @@ object DateUtils {
     }
 
     /**
-     * Formats a timestamp to a date string for due dates
+     * Formats "2025-10-06T09:30:00Z" to String for due dates
      * 
      * Examples:
      * - "Today" (same day)
@@ -69,7 +74,9 @@ object DateUtils {
      * - "Yesterday" (previous day)  
      * - "Jan 15, 2025" (other dates)
      */
-    fun formatDueDate(timestamp: Long): String {
+    fun formatDueDate(isoString: String): String {
+        val timestamp = parseIsoString(isoString)
+
         // Compare calendar dates, not timestamps for accuracy.
         val todayCalendar = java.util.Calendar.getInstance().apply {
             set(java.util.Calendar.HOUR_OF_DAY, 0)

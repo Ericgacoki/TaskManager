@@ -193,6 +193,12 @@ fun TaskDetailScreenContent(
     val currentDueDateMillis = uiState.updatedTask?.dueDate?.let {
         DateUtils.parseIsoString(it)
     }
+    
+    val humanReadableUpdatedAt = remember(uiState.updatedTask?.updatedAt) { 
+        uiState.updatedTask?.updatedAt?.let { 
+            DateUtils.formatToReadableDate(it)
+        } ?: "N/A"
+    }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = currentDueDateMillis,
@@ -356,7 +362,7 @@ fun TaskDetailScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = uiState.updatedTask?.dueDate?.let {
-                                    DateUtils.formatDueDate(DateUtils.parseIsoString(it))
+                                    DateUtils.formatDueDate(it)
                                 } ?: "N/A", style = MaterialTheme.typography.bodyLarge)
                             }
                         }
@@ -387,7 +393,7 @@ fun TaskDetailScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = uiState.updatedTask?.updatedAt ?: "N/A",
+                                    text = humanReadableUpdatedAt,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
@@ -500,7 +506,7 @@ fun TaskDetailScreenContent(
                                 ) {
                                     Text(
                                         text = uiState.updatedTask?.dueDate?.let {
-                                            DateUtils.formatDueDate(DateUtils.parseIsoString(it))
+                                            DateUtils.formatDueDate(it)
                                         } ?: "Today",
                                         style = MaterialTheme.typography.bodyLarge
                                     )
@@ -720,7 +726,7 @@ private fun TaskDetailScreenDarkPreview() {
                     completed = false,
                     dueDate = "2025-01-01T10:00:00Z",
                     createdAt = "2024-01-01T10:00:00Z",
-                    updatedAt = "45 minutes ago"
+                    updatedAt = "2025-01-19T13:15:00Z"
                 ), taskMode = TaskMode.VIEW
             )
         )

@@ -41,14 +41,23 @@ class TaskDataRepository @Inject constructor(
 
     override suspend fun insertTask(task: Task): Resource<Unit> {
         return try {
-            val entity = task.toEntity(
-                timestampCreated = System.currentTimeMillis(),
-                timestampUpdated = System.currentTimeMillis()
-            )
+            val entity = task.toEntity()
             taskDao.insertTask(entity)
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to insert task")
+        }
+    }
+
+    override suspend fun insertTasks(tasks: List<Task>): Resource<Unit> {
+        return try {
+            val entities = tasks.map { task ->
+                task.toEntity()
+            }
+            taskDao.insertTasks(entities)
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to insert tasks")
         }
     }
 
@@ -113,6 +122,17 @@ class TaskDataRepository @Inject constructor(
         }
     }
 
+    override fun getUnSyncedTasks(lastSyncTimestamp: Long): Flow<Resource<List<Task>>> {
+        return taskDao.getUnSyncedTasks(lastSyncTimestamp).map { entities ->
+            try {
+                val tasks = entities.map { it.toDomain() }
+                Resource.Success(tasks)
+            } catch (e: Exception) {
+                Resource.Error(e.message ?: "Failed to get unsynced tasks")
+            }
+        }
+    }
+
     override fun getCompletedTaskCount(): Flow<Resource<Int>> {
         return taskDao.getCompletedTaskCount().map { count ->
             try {
@@ -136,7 +156,9 @@ class TaskDataRepository @Inject constructor(
         return appDataStore.lastSyncTime.map { timestamp ->
             try {
                 if (timestamp != null && timestamp > 0) {
-                    DateUtils.formatTimestamp(timestamp)
+
+                    val isoString = DateUtils.formatToIsoString(timestamp)
+                    DateUtils.formatToReadableDate(isoString)
                 } else {
                     null
                 }

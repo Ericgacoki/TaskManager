@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
@@ -29,14 +30,31 @@ class SyncWorker @AssistedInject constructor(
         return try {
             val syncResult = syncRepository.syncTasks()
                 .first { it !is Resource.Loading }
-                
+
             when (syncResult) {
-                is Resource.Success -> Result.success()
-                is Resource.Error -> Result.retry()
-                is Resource.Loading -> Result.retry() // Should never reach here
+                is Resource.Success -> {
+                    Result.success()
+                }
+
+                is Resource.Error -> {
+                    val outputData = Data.Builder()
+                        .putString("error_message", syncResult.message)
+                        .build()
+
+                    Result.failure(outputData)
+                }
+
+                is Resource.Loading -> {
+                    Result.retry() // Should never reach here
+                }
             }
         } catch (e: Exception) {
-            Result.failure()
+            val outputData = Data.Builder()
+                .putString("error_message", e.message)
+                .putString("exception_type", e.javaClass.simpleName)
+                .build()
+
+            Result.failure(outputData)
         }
     }
 

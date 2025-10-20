@@ -1,5 +1,6 @@
 package com.dlight.eric.taskmanager.di
 
+import com.dlight.eric.taskmanager.BuildConfig
 import com.dlight.eric.taskmanager.data.remote.api.AuthApiService
 import com.dlight.eric.taskmanager.data.remote.api.TaskApiService
 import dagger.Module
@@ -38,7 +39,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://localhost:3000/")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -22,14 +22,31 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"https://production.api.com/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+    
+    flavorDimensions += "device"
+    productFlavors {
+        create("emulator") {
+            dimension = "device"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/\"")
+        }
+        create("device") {
+            dimension = "device"
+            buildConfigField("String", "BASE_URL", "\"http://192.168.100.11:3000/\"")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -39,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
