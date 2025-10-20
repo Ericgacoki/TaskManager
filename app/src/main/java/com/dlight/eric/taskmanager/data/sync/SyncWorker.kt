@@ -27,12 +27,13 @@ class SyncWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            val syncResult = syncRepository.syncTasks().first()
-
+            val syncResult = syncRepository.syncTasks()
+                .first { it !is Resource.Loading }
+                
             when (syncResult) {
                 is Resource.Success -> Result.success()
                 is Resource.Error -> Result.retry()
-                is Resource.Loading -> Result.retry()
+                is Resource.Loading -> Result.retry() // Should never reach here
             }
         } catch (e: Exception) {
             Result.failure()
