@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.dlight.eric.taskmanager.data.sync.NetworkMonitor
+import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import com.dlight.eric.taskmanager.presentation.navigation.AppNavigation
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity(), NetworkMonitor.ConnectivityListener {
     override fun onConnectivityChanged(isConnected: Boolean) {
         runOnUiThread {
             val message = if (isConnected) {
-                "Back online! Syncing your tasks..."
+                "Back online!"
             } else {
-                "You're offline."
+                "You're offline \uD83D\uDCA9"
             }
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }

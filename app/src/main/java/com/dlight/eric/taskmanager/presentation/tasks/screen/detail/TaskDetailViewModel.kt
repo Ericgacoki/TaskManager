@@ -2,7 +2,9 @@ package com.dlight.eric.taskmanager.presentation.tasks.screen.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import com.dlight.eric.taskmanager.domain.model.Task
+import com.dlight.eric.taskmanager.domain.repository.SyncRepository
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskDetailEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskDetailError
@@ -23,7 +25,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskDetailViewModel @Inject constructor(
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val syncRepository: SyncRepository,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TaskDetailState())
@@ -224,6 +228,11 @@ class TaskDetailViewModel @Inject constructor(
                             taskMode = TaskMode.VIEW
                         )
                     }
+                    
+                    // Trigger sync if network is available
+                    if (networkMonitor.isConnected()) {
+                        syncRepository.triggerSync()
+                    }
                 }
 
                 is Resource.Error -> {
@@ -323,6 +332,11 @@ class TaskDetailViewModel @Inject constructor(
                             isSaving = false,
                             error = TaskDetailError.None
                         )
+                    }
+                    
+                    // Trigger sync if network is available
+                    if (networkMonitor.isConnected()) {
+                        syncRepository.triggerSync()
                     }
                 }
 

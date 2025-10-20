@@ -1,7 +1,10 @@
 package com.dlight.eric.taskmanager.presentation.tasks.screen.list
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
+import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import com.dlight.eric.taskmanager.domain.repository.AuthRepository
 import com.dlight.eric.taskmanager.domain.repository.SyncRepository
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
@@ -9,6 +12,7 @@ import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
 import com.dlight.eric.taskmanager.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +28,9 @@ import javax.inject.Inject
 class TaskListViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val authRepository: AuthRepository,
-    private val syncRepository: SyncRepository
+    private val syncRepository: SyncRepository,
+    private val networkMonitor: NetworkMonitor,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _tasksUiState = MutableStateFlow(TaskListUiState())
@@ -34,6 +40,7 @@ class TaskListViewModel @Inject constructor(
         getLastSyncTime()
         getUnSyncedTaskCount()
         onEvent(TaskEvent.LoadTasks)
+        observeSyncWorker()
     }
 
     fun onEvent(event: TaskEvent) {
@@ -109,6 +116,11 @@ class TaskListViewModel @Inject constructor(
             if (result is Resource.Error) {
                 _tasksUiState.update {
                     it.copy(error = result.message)
+                }
+            } else if (result is Resource.Success) {
+                // Trigger sync if network is available
+                if (networkMonitor.isConnected()) {
+                    syncRepository.triggerSync()
                 }
             }
         }
@@ -190,6 +202,20 @@ class TaskListViewModel @Inject constructor(
             try {
                 syncRepository.triggerSync()
             } catch (_: Exception) { }
+        }
+    }
+    
+    private fun observeSyncWorker() {
+        viewModelScope.launch {
+            WorkManager.getInstance(context)
+                .getWorkInfosForUniqueWorkLiveData("task_sync_work")
+                .observeForever { workInfos ->
+                    val isCompleted = workInfos.any { it.state.isFinished }
+                    if (isCompleted) {
+                        /*getUnSyncedTaskCount()
+                        getLastSyncTime()*/
+                    }
+                }
         }
     }
 }

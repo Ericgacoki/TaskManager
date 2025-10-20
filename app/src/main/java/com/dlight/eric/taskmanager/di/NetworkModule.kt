@@ -5,7 +5,7 @@ import android.net.ConnectivityManager
 import com.dlight.eric.taskmanager.BuildConfig
 import com.dlight.eric.taskmanager.data.remote.api.AuthApiService
 import com.dlight.eric.taskmanager.data.remote.api.TaskApiService
-import com.dlight.eric.taskmanager.data.sync.NetworkMonitor
+import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
