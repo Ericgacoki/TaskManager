@@ -90,19 +90,27 @@ Edit `app/build.gradle.kts` → `device` flavor → Update IP address
 
 Run tests: `./gradlew test` (unit) and `./gradlew connectedAndroidTest` (integration/UI)
 
-**Test Reports:** <a href="./TestResults/unit_tests.html" target="_blank">Unit Tests</a> | <a href="./TestResults/dao_tests.html" target="_blank">Integration Tests</a>
+**Test Reports:** <a href="./TestResults/unit_tests.html" target="_blank">Unit Tests</a> | <a href="./TestResults/dao_tests.html" target="_blank">Integration Tests</a> | <a href="./TestResults/sync_tests.html" target="_blank">Sync Tests</a>
 
 <details>
 <summary>Test Coverage</summary>
 
 **Unit Tests:**
+
 - `TaskMapperTest` - Data layer mapping (Entity ↔ Domain ↔ DTO)
 - `AuthDataRepositoryTest` - Mock authentication with token management  
 - `TaskDataRepositoryTest` - CRUD operations and Resource wrapper testing
 
+**Sync Tests:**
+
+- `SyncManagerTest` - Sync business logic, conflict resolution, and error handling
+- `SyncWorkerTest` - WorkManager integration, business logic, and exception handling
+
 **Integration Tests:**
+
 - `TaskDaoTest` - Room database operations with in-memory testing
 - `AuthRepositoryMockWebServerTest` - API integration with MockWebServer
+- `SyncWorkerIntegrationTest` - WorkManager scheduling, constraints, and lifecycle
 
 **UI Tests:**
 - `LoginAddUpdateTaskTest` - End-to-end user journey (Login → Create → Edit → Verify) ⚠️ *In development*
