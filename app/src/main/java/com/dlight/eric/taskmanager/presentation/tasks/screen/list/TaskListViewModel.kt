@@ -4,6 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo.State.BLOCKED
+import androidx.work.WorkInfo.State.CANCELLED
+import androidx.work.WorkInfo.State.ENQUEUED
+import androidx.work.WorkInfo.State.FAILED
 import androidx.work.WorkInfo.State.RUNNING
 import androidx.work.WorkInfo.State.SUCCEEDED
 import androidx.work.WorkManager
@@ -39,12 +43,16 @@ class TaskListViewModel @Inject constructor(
 
     private val _tasksUiState = MutableStateFlow(TaskListUiState())
     val tasksUiState: StateFlow<TaskListUiState> = _tasksUiState.asStateFlow()
+    
+    private var connectivityListener: NetworkMonitor.ConnectivityListener? = null
 
     init {
         getLastSyncTime()
         getUnSyncedTaskCount()
         onEvent(TaskEvent.LoadTasks)
+
         observeSyncWorker()
+        observeNetworkState()
     }
 
     fun onEvent(event: TaskEvent) {
@@ -223,8 +231,8 @@ class TaskListViewModel @Inject constructor(
     private fun observeSyncWorker() {
         viewModelScope.launch {
             WorkManager.getInstance(context)
-                .getWorkInfosForUniqueWorkLiveData("task_sync_work")
-                .observeForever { workInfos ->
+                .getWorkInfosForUniqueWorkFlow("task_sync_work")
+                .collectLatest { workInfos ->
                     val workInfo = workInfos.firstOrNull()
                     workInfo?.let { info ->
                         when (info.state) {
@@ -247,7 +255,7 @@ class TaskListViewModel @Inject constructor(
                                 }
                             }
 
-                            else -> {
+                            FAILED -> {
                                 val errorMessage =
                                     info.outputData.getString("error_message")
                                         ?: "Sync failed"
@@ -257,12 +265,56 @@ class TaskListViewModel @Inject constructor(
                                         syncError = errorMessage
                                     )
                                 }
+                                Log.e("WORK OBSERVER", "SYNC FAILED: $errorMessage")
+                            }
 
-                                Log.e("WORK OBSERVER", "FAILED WITH: $errorMessage")
+                            CANCELLED -> {
+                                _tasksUiState.update {
+                                    it.copy(
+                                        syncState = SyncState.PENDING,
+                                        syncError = null
+                                    )
+                                }
+                                Log.d("WORK OBSERVER", "SYNC CANCELLED")
+                            }
+
+                            ENQUEUED, BLOCKED -> {
+                                // Work is waiting or blocked - keep current state
+                                Log.d("WORK OBSERVER", "SYNC ${info.state.name}")
                             }
                         }
                     }
                 }
+        }
+    }
+
+    private fun observeNetworkState() {
+        connectivityListener = object : NetworkMonitor.ConnectivityListener {
+            override fun onConnectivityChanged(isConnected: Boolean) {
+                val currentState = _tasksUiState.value.syncState
+
+                if (currentState == SyncState.SYNCING && !isConnected) {
+                    _tasksUiState.update {
+                        it.copy(
+                            syncState = SyncState.FAILED,
+                            syncError = "Network connection lost"
+                        )
+                    }
+                }
+            }
+        }
+        
+        connectivityListener?.let { listener ->
+            networkMonitor.addConnectivityListener(listener)
+            networkMonitor.startMonitoring()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        connectivityListener?.let { listener ->
+            networkMonitor.removeConnectivityListener(listener)
+            networkMonitor.stopMonitoring()
         }
     }
 }
