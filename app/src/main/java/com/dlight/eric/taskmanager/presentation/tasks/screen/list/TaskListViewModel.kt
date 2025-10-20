@@ -178,6 +178,7 @@ class TaskListViewModel @Inject constructor(
 
     private fun pullToRefresh() {
         loadTasks(pullToRefresh = true)
+        triggerSync()
     }
 
     private fun retry() {
@@ -188,9 +189,7 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 syncRepository.triggerSync()
-                // No need to hard-refresh because data collectors are reactive
             } catch (_: Exception) { }
         }
     }
 }
-

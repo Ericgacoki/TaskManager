@@ -51,23 +51,25 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun createEmptyTask(): Task {
-        // Get today's date at 12:00 PM to avoid timezone edge cases
+        val currentTime = System.currentTimeMillis()
+        
+        // Get today's date at 12:00 PM for due date only (to avoid timezone edge cases)
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 12)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-        val today = calendar.timeInMillis
+        val todayNoon = calendar.timeInMillis
 
         return Task(
             id = UUID.randomUUID().toString(),
             title = "",
             description = "",
             completed = false,
-            dueDate = DateUtils.formatToIsoString(today),
-            createdAt = DateUtils.formatToIsoString(today),
-            updatedAt = DateUtils.formatToIsoString(today)
+            dueDate = DateUtils.formatToIsoString(todayNoon),
+            createdAt = DateUtils.formatToIsoString(currentTime),
+            updatedAt = DateUtils.formatToIsoString(currentTime)
         )
     }
 
