@@ -39,19 +39,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dlight.eric.taskmanager.R
 import com.dlight.eric.taskmanager.domain.model.Task
+import com.dlight.eric.taskmanager.presentation.tasks.components.SyncStateHeader
 import com.dlight.eric.taskmanager.presentation.tasks.components.TaskItem
-import com.dlight.eric.taskmanager.presentation.tasks.components.UnSyncedTasksHeader
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
+import com.dlight.eric.taskmanager.presentation.tasks.state.SyncState
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
 import com.dlight.eric.taskmanager.utils.LottieEmptyState
@@ -255,10 +255,12 @@ fun TaskListContent(
                             ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        if (uiState.unSyncedTaskCount > 0) {
+                        if (uiState.syncState != SyncState.SYNCED) {
                             stickyHeader {
-                                UnSyncedTasksHeader(
+                                SyncStateHeader(
                                     unSyncedCount = uiState.unSyncedTaskCount,
+                                    syncState = uiState.syncState,
+                                    syncError = uiState.syncError,
                                     onSyncClick = onTriggerSync
                                 )
                             }
@@ -370,6 +372,7 @@ fun TaskListContentPreview() {
                 lastSyncTime = "5 min ago",
                 unSyncedTaskCount = 2,
                 isPullingToRefresh = true,
+                syncState = SyncState.PENDING,
                 tasks = listOf(
                     Task(
                         id = "1",

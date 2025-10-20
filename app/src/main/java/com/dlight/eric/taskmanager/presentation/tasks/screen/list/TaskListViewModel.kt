@@ -3,13 +3,17 @@ package com.dlight.eric.taskmanager.presentation.tasks.screen.list
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo.State.FAILED
+import androidx.work.WorkInfo.State.RUNNING
+import androidx.work.WorkInfo.State.SUCCEEDED
 import androidx.work.WorkManager
-import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import com.dlight.eric.taskmanager.domain.repository.AuthRepository
 import com.dlight.eric.taskmanager.domain.repository.SyncRepository
 import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
+import com.dlight.eric.taskmanager.presentation.tasks.state.SyncState
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
+import com.dlight.eric.taskmanager.utils.NetworkMonitor
 import com.dlight.eric.taskmanager.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -180,8 +184,18 @@ class TaskListViewModel @Inject constructor(
                 }
                 .collect { result ->
                     if (result is Resource.Success) {
-                        _tasksUiState.update {
-                            it.copy(unSyncedTaskCount = result.data ?: 0)
+                        val count = result.data ?: 0
+                        _tasksUiState.update { state ->
+                            state.copy(
+                                unSyncedTaskCount = count,
+                                syncState = if (count > 0 && state.syncState != SyncState.SYNCING) {
+                                    SyncState.PENDING
+                                } else if (count == 0 && state.syncState != SyncState.FAILED) {
+                                    SyncState.SYNCED
+                                } else {
+                                    state.syncState
+                                }
+                            )
                         }
                     }
                 }
@@ -196,24 +210,58 @@ class TaskListViewModel @Inject constructor(
     private fun retry() {
         loadTasks()
     }
-    
+
     private fun triggerSync() {
         viewModelScope.launch {
             try {
                 syncRepository.triggerSync()
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
         }
     }
-    
+
     private fun observeSyncWorker() {
         viewModelScope.launch {
             WorkManager.getInstance(context)
                 .getWorkInfosForUniqueWorkLiveData("task_sync_work")
                 .observeForever { workInfos ->
-                    val isCompleted = workInfos.any { it.state.isFinished }
-                    if (isCompleted) {
-                        /*getUnSyncedTaskCount()
-                        getLastSyncTime()*/
+                    val workInfo = workInfos.firstOrNull()
+                    workInfo?.let { info ->
+                        when (info.state) {
+                            RUNNING -> {
+                                _tasksUiState.update {
+                                    it.copy(
+                                        syncState = SyncState.SYNCING,
+                                        syncError = null
+                                    )
+                                }
+                            }
+
+                            SUCCEEDED -> {
+                                val count = _tasksUiState.value.unSyncedTaskCount
+                                _tasksUiState.update {
+                                    it.copy(
+                                        syncState = if (count > 0) SyncState.PENDING else SyncState.SYNCED,
+                                        syncError = null
+                                    )
+                                }
+                            }
+
+                            FAILED -> {
+                                val errorMessage = info.outputData.getString("error_message")
+                                    ?: "Sync failed"
+                                _tasksUiState.update {
+                                    it.copy(
+                                        syncState = SyncState.FAILED,
+                                        syncError = errorMessage
+                                    )
+                                }
+                            }
+
+                            else -> {
+                                // ENQUEUED, BLOCKED, CANCELLED - keep current state
+                            }
+                        }
                     }
                 }
         }
