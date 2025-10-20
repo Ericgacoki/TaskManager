@@ -90,7 +90,7 @@ Edit `app/build.gradle.kts` → `device` flavor → Update IP address
 
 Run tests: `./gradlew test` (unit) and `./gradlew connectedAndroidTest` (integration/UI)
 
-**Test Reports:** <a href="./TestResults/unit_tests.html" target="_blank">Unit Tests</a> | <a href="./TestResults/dao_tests.html" target="_blank">Integration Tests</a> | <a href="./TestResults/sync_tests.html" target="_blank">Sync Tests</a>
+**Test Reports:** <a href="./TestResults/unit_tests.html" target="_blank">Unit Tests</a> | <a href="./TestResults/dao_tests.html" target="_blank">Integration Tests</a> | <a href="./TestResults/sync_tests.html" target="_blank">Sync Tests</a> | <a href="./TestResults/sync_instrumented.html" target="_blank">Sync Instrumented</a>
 
 <details>
 <summary>Test Coverage</summary>

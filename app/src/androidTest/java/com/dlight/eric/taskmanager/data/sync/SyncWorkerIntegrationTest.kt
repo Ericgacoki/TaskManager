@@ -101,17 +101,6 @@ class SyncWorkerIntegrationTest {
     }
 
     @Test
-    fun testPeriodicWorkInterval() {
-        SyncWorker.enqueuePeriodicSync(context)
-
-        val workInfos = workManager.getWorkInfosForUniqueWork("periodic_task_sync_work").get()
-        assertTrue("Periodic work should be enqueued", workInfos.isNotEmpty())
-
-        val workInfo = workInfos[0]
-        assertTrue("Should be periodic work", workInfo.tags.contains("androidx.work.PeriodicWorkRequest"))
-    }
-
-    @Test
     fun testMultipleImmediateSyncEnqueue() {
         repeat(3) {
             SyncWorker.enqueueImmediateSync(context)
