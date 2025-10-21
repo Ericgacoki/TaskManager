@@ -141,6 +141,7 @@ fun SyncStateHeader(
                     ) {
                         Text(
                             text = "Sync",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )

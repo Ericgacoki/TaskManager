@@ -24,11 +24,11 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
-            buildConfigField("String", "BASE_URL", "\"https://task-manager-kzckwn8js-ericgacokis-projects.vercel.app/\"")
+            buildConfigField("String", "BASE_URL", "\"https://task-manager-alpha-three-98.vercel.app/\"")
         }
         release {
             isMinifyEnabled = false
-            buildConfigField("String", "BASE_URL", "\"https://task-manager-kzckwn8js-ericgacokis-projects.vercel.app/\"")
+            buildConfigField("String", "BASE_URL", "\"https://task-manager-alpha-three-98.vercel.app/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
