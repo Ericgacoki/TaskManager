@@ -51,7 +51,7 @@ cd TaskManager
 ```
 
 > [!Note] 
-> The app uses a deployed mock server on [Vercel](https://task-manager-kzckwn8js-ericgacokis-projects.vercel.app/) - no local server setup is required!
+> The app uses a deployed mock server on [Vercel](https://task-manager-alpha-three-98.vercel.app/) - no local server setup is required!
 
 ## Usage
 

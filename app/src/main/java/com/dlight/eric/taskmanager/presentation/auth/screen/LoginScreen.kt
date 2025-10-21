@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -81,9 +82,19 @@ fun LoginScreenContent(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Welcome to Task Manager",
+                text = "Welcome to",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp)
+            )
+
+            Text(
+                text = "Task Manager",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
             )
 
             OutlinedTextField(
@@ -91,7 +102,7 @@ fun LoginScreenContent(
                 onValueChange = onEmailChange,
                 label = { Text("Email") },
                 placeholder = { Text("Enter your email") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
                 isError = uiState.error is AuthError.InputError,
                 maxLines = 1,
                 modifier = Modifier
