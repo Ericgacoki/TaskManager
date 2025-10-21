@@ -1,138 +1,207 @@
-# TaskManager - d.light Android Engineer Take-Home Challenge
+# TaskManager
 
-This is my solution for the d.light Android Engineer Take-Home Challenge, demonstrating an offline-first task management app with robust synchronization capabilities for network-limited environments.
+An offline-first task management Android app built for d.Light's engineering challenge, designed to work reliably in network-limited environments with automatic synchronization.
 
-## Challenge Overview
+<p align="center">
+  <img src="https://img.shields.io/badge/build-passing-brightgreen.svg">
+  <img src="https://img.shields.io/badge/platform-Android-green.svg">
+  <img src="https://img.shields.io/badge/API-26%2B-brightgreen.svg">
+  <img src="https://img.shields.io/badge/language-Kotlin-purple.svg">
+  <img src="https://img.shields.io/badge/architecture-MVVM%20%2B%20Repository-orange.svg">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg">
+</p>
 
-**Goal:** Build a Task Manager app that works fully offline, syncs automatically with a remote backend when online, and handles conflicts between local and remote updates in a predictable way.
+## Demo
 
-**Key Features:**
-- [x] **Offline-First:** All operations work without network and persist locally
-- [x] **Intelligent Sync:** Background sync using WorkManager + immediate sync via NetworkMonitor
-- [x] **Conflict Resolution:** Last-write-wins strategy based on `updatedAt` timestamps
-- [x] **Clean Architecture:** MVVM pattern with Repository abstraction and Room as single source of truth
-- [x] **Comprehensive Testing:** Unit, and Integration tests with MockWebServer
+*⚠️ TODO:*
+- Add 3min video
+- Add 2 screenshots
 
-**Pending Features:**
-- [ ] **Advanced Sync:** Manual conflict resolution with user choice dialogs *(in development on `feat-adv-sync` branch)*
+<img alt ="Gif/Video" src="" width="270"/> <img src="" width="270" alt="Image"/> <img src="" width="270" alt="Image"/>
 
-## Development Setup
+## Features
 
-*This setup handles the complexity of Android network access across different environments. Emulators and physical devices require different IP configurations to reach your local server.*
+- [x] **Full Offline Support** – Create, view, update, and delete tasks without a network connection  
+- [x] **Automatic Sync** – Background synchronization when a network is available  
+- [x] **Conflict Resolution** – Last-write-wins strategy for predictable data merging  
+- [x] **MVVM + Repository Pattern** – Layered design using Room as the single source of truth  
+- [x] **Real-time Updates** – Instant UI updates powered by Kotlin Flow  
+- [x] **Network Monitoring** – Detects connectivity changes to trigger immediate sync  
+- [x] **Background Sync** – WorkManager ensures data consistency even when the app is closed  
+- [x] **Compose Previews** – Each UI component includes previews for faster development  
+- [ ] **Advanced Sync** – User-driven conflict resolution *(in development)*  
+
+
+## Installation
 
 ### Prerequisites
-- **Node.js** installed on your system
 
-### 1. Server Setup
-*Provides a local json-server API endpoint for testing sync functionality without requiring a production backend.*
+- Android Studio Meerkat | 2024.3.1 Patch 2 or later
+- JDK 17
+- Android SDK 35 (minSdk 26)
+- Node.js (for mock server)
 
+### Setup
+
+1. Clone the repository:
 ```bash
-# Start the mock server
-cd server
-npm install
-npm start
-# Server runs on http://localhost:3000
+git clone https://github.com/Ericgacoki/TaskManager.git
+cd TaskManager
+```
+2. Install and start the mock server:
+```bash
+npm install -g json-server
+json-server --watch db.json --port 3000
 ```
 
-**Task Schema:** See `server/schema.json` for detailed field types and example data.
-
-### Available Endpoints
-- `GET /tasks`
-- `POST /tasks`
-- `PUT /tasks/:id`
-- `DELETE /tasks/:id`
-### Unavailable Endpoints
-- `GET /tasks?since=<timestamp>` - once added, it'll be used to Fetch tasks modified since timestamp
-
-### 2. Configure IP for Device Testing
-
-**For Android Emulator:**
-*Emulators use `10.0.2.2` to access the host machine's localhost, enabling API communication.*
-
+3. Build and run:
 ```bash
-./gradlew assembleEmulatorDebug
-# Uses: http://10.0.2.2:3000
+# For emulator (uses http://10.0.2.2:3000)
+./gradlew installEmulatorDebug
+
+# For physical device (update IP in build.gradle)
+./gradlew installDeviceDebug
 ```
 
-**For Physical Device:**
-*Physical devices need your actual WiFi IP address since they can't access `localhost`. WiFi IPs change frequently, requiring updates. The script below automatically updates the BASE_URL in the gradle file.*
+## Usage
 
-```bash
-# IMPORTANT: Update IP before building
-./update_device_ip.sh
+### Running the App
 
-# Option 1: Command line
-./gradlew assembleDeviceDebug
-adb install app/build/outputs/apk/device/debug/app-device-debug.apk
+1. **Start the mock server** (see Installation)
+2. **Launch the app** from Android Studio or command line
+3. **Login** with any email (no password required)
+4. **Create tasks** - Works immediately, even offline
+5. **Toggle network** - Watch automatic sync in action
 
-# Option 2: Android Studio
-# Switch Build Variants panel to 'deviceDebug' before hitting Run
-# Uses: http://YOUR_WIFI_IP:3000
+## Design/Architectural decisions
+
+### Tech Stack
+
+- **Language:** Kotlin
+- **UI:** Jetpack Compose with Material 3
+- **Architecture:** MVVM + Repository Pattern
+- **Database:** Room
+- **Storage:** DataStore (preferences)
+- **Networking:** Retrofit + OkHttp
+- **DI:** Hilt/Dagger
+- **Async:** Kotlin Coroutines + Flow
+- **Background:** WorkManager
+- **System:** NetworkMonitor
+- **Animations:** Lottie
+- **Testing:** JUnit, Mockito, MockWebServer
+
+### Project Structure
+
+The app follows a layered architecture with three main layers:
+
+- **Domain Layer** - Business logic, models, and repository interfaces
+- **Data Layer** - Repository implementations, Room database, API services, and data mappers
+- **Presentation Layer** - ViewModels, Compose screens, and UI components
+
+### Architecture/Flow Overview
+
+```mermaid
+graph RL
+  UI[Compose UI] -->|Events| VM[ViewModel]
+  VM -->|States| UI
+  VM --> Repo[Repository]
+  Repo --> Room[(Room DB)]
+  Repo --> API[Retrofit API]
+  Repo --> DS[(DataStore)]
+  
+  NM[NetworkMonitor] --> WM[WorkManager]
+  WM -->|doWork| Sync[SyncManager]
+  Sync -->|Sync operations| Repo
 ```
-
-**Manual IP Update:**
-Edit `app/build.gradle.kts` → `device` flavor → Update IP address
-
-## Sync Architecture
-
-### Dual-Layer Sync: NetworkMonitor + WorkManager
-
-**Problem:** Users in network-limited areas may only have brief connectivity windows (e.g., 2-minute WiFi at a bus stop).
-
-**Solution:** 
-- **NetworkMonitor** - Detects network changes instantly while app is open, triggers immediate sync
-- **WorkManager** - Runs every 15 minutes in background, ensures eventual sync even if app is closed
-- **Why both?** WorkManager alone would miss short connectivity windows; NetworkMonitor alone wouldn't sync when app is closed
-
-**Benefits:** This architecture maximizes sync opportunities in network-limited environments while preserving battery life. Users get instant synchronization during brief connectivity windows when the app is open, while background sync ensures data consistency even when the app is closed. The offline-first approach with Room as the single source of truth guarantees the app remains fully functional without network access, making it reliable for users in areas with intermittent connectivity.
-
-## Tests
-
-Run tests: `./gradlew test` (unit) and `./gradlew connectedAndroidTest` (integration/UI)
-
-**Test Reports:** <a href="./TestResults/unit_tests.html" target="_blank">Unit Tests</a> | <a href="./TestResults/dao_tests.html" target="_blank">Integration Tests</a> | <a href="./TestResults/sync_tests.html" target="_blank">Sync Tests</a> | <a href="./TestResults/sync_instrumented.html" target="_blank">Sync Instrumented</a>
 
 <details>
-<summary>Test Coverage</summary>
+<summary>Detailed Project Structure</summary>
 
-**Unit Tests:**
-
-- `TaskMapperTest` - Data layer mapping (Entity ↔ Domain ↔ DTO)
-- `AuthDataRepositoryTest` - Mock authentication with token management  
-- `TaskDataRepositoryTest` - CRUD operations and Resource wrapper testing
-
-**Sync Tests:**
-
-- `SyncManagerTest` - Sync business logic, conflict resolution, and error handling
-- `SyncWorkerTest` - WorkManager integration, business logic, and exception handling
-
-**Integration Tests:**
-
-- `TaskDaoTest` - Room database operations with in-memory testing
-- `AuthRepositoryMockWebServerTest` - API integration with MockWebServer
-- `SyncWorkerIntegrationTest` - WorkManager scheduling, constraints, and lifecycle
-
-**UI Tests:**
-- `LoginAddUpdateTaskTest` - End-to-end user journey (Login → Create → Edit → Verify) ⚠️ *In development*
-
+```
+TaskManager/
+├── app/
+│   └── src/
+│       ├── main/
+│       │   ├── java/.../taskmanager
+│       │   │   ├── domain         # Models & interfaces
+│       │   │   ├── data/          # Repository implementations
+│       │   │   │   ├── local      # Room database
+│       │   │   │   ├── remote     # API services
+│       │   │   │   └── mapper     # Data transformations
+│       │   │   └── presentation   # UI layer
+│       │   │       ├── viewmodel  # ViewModels
+│       │   │       ├── screen     # Compose screens
+│       │   │       └── component  # Reusable UI components
+│       │   └── res                # Resources - Icons and stuff
+│       └── test                   # Unit & integration tests
+└── build.gradle.kts               # Build configuration
+```
 </details>
 
-## Further Improvements
+### Sync Architecture
 
-### Data Reset Handling
-**Current Limitation:** When app data is cleared or user logs in on a new device, all server tasks are restored as the app treats this as a "first sync" scenario.
+The app uses a **dual-layer sync strategy** optimized for network-limited environments:
 
-**Potential Solutions:**
-- **User Intent Detection**: Distinguish between accidental data loss vs intentional reset
-- **User Choice Dialog**: On fresh install, ask "Restore previous tasks?" vs "Start fresh?"
-- **Server-Side Soft Delete**: Implement task deletion syncing with server cleanup
+**NetworkMonitor** triggers instant `one-time` syncs when the app is open and connectivity is restored, capturing brief online windows that WorkManager's 15-minute `periodic` cycle would miss.
 
-### Enhanced Conflict Resolution
-- Support for field-level merging instead of whole-task overwrites
-- User-driven conflict resolution for simultaneous edits
-- Backup/restore functionality for critical data loss scenarios
+**WorkManager** handles reliable periodic syncs every 15 minutes even when the app is closed, using network constraints and respecting battery optimization and Doze mode.
 
-### Performance Optimizations
-- Incremental sync with delta updates
-- Background sync frequency based on user activity
-- Local caching improvements for faster app startup
+Together, they ensure fast, consistent updates with minimal power consumption - immediate sync during active use and guaranteed eventual consistency in the background.
+
+> [!NOTE]
+> "The exact time that the worker is going to be executed depends on the constraints that are used in your WorkRequest and on system optimizations. WorkManager is designed to give the best behavior under these restrictions." 
+>
+> [Refer to Docs](https://developer.android.com/develop/background-work/background-tasks/persistent/getting-started#submit_the_workrequest_to_the_system)
+
+
+**Conflict Resolution**
+- Last-write-wins based on `updatedAt` timestamp
+- Automatic merging without user intervention
+- I'm working on advanced mode where users can choose which version to keep - Giving the user "more control".
+
+## Testing
+
+The project includes comprehensive test coverage:
+
+- **Unit Tests:** Repository logic, data mapping, business logic edge cases
+- **Integration Tests:** Room DAO, API calls with MockWebServer
+- **UI Tests:** End-to-end user flow with Compose Testing
+
+```bash
+# Unit tests
+./gradlew test
+
+# Integration tests (requires device/emulator)
+./gradlew connectedAndroidTest
+
+# All tests with coverage
+./gradlew testDebugUnitTest connectedDebugAndroidTest
+```
+
+### Test Results
+
+Below is a screenshot of DAO Test results on an Android 11 OPPO device:
+
+![Dao Test Results](images/dao_tests.png)
+
+More test results can be viewed [here]()
+
+## Acknowledgments
+
+- Built for the d.light Android Engineer assessment  
+- Inspired by offline-first architecture patterns  
+- Thanks to the Android community for excellent documentation  
+
+## Contributing
+
+Fork the repo, create a feature branch, and submit a PR.  
+Follow existing code patterns and include relevant tests.
+
+> [!NOTE]
+> This is a technical assessment project demonstrating offline-first architecture, background synchronization, and clean code practices in Android development.
+
+---
+
+## License
+
+MIT License – see the [LICENSE](LICENSE) file for details.

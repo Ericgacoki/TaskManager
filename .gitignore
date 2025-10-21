@@ -15,6 +15,7 @@ CLAUDE.md
 *.jks
 *.keystore
 db.json
+!server/db.json
 node_modules/
 server/package-lock.json
 secrets.properties
