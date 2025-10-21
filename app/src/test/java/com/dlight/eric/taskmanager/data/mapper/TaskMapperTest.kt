@@ -35,24 +35,6 @@ class TaskMapperTest {
     }
 
     @Test
-    fun `should map Domain to TaskDto with provided ISO timestamps`() {
-        val domain = createSampleTask()
-        val customCreatedIso = "2022-01-01T00:00:00Z"
-        val customUpdatedIso = "2022-01-02T00:00:00Z"
-        val customDueDateIso = "2022-01-03T00:00:00Z"
-
-        val dto = domain.toDto(
-            isoCreatedAt = customCreatedIso,
-            isoUpdatedAt = customUpdatedIso,
-            isoDueDate = customDueDateIso
-        )
-
-        assertEquals(customCreatedIso, dto.createdAt)
-        assertEquals(customUpdatedIso, dto.updatedAt)
-        assertEquals(customDueDateIso, dto.dueDate)
-    }
-
-    @Test
     fun `should convert empty description to null in Domain to DTO mapping`() {
         val domain = createSampleTask(description = "")
 

@@ -8,55 +8,51 @@ import java.util.UUID
 
 object TaskMapper {
 
-     fun TaskEntity.toDomain(): Task {
+    fun TaskEntity.toDomain(): Task {
         return Task(
             id = id,
             title = title,
             description = description,
             completed = completed,
             dueDate = DateUtils.formatToIsoString(dueDate),
-            createdAt = DateUtils.formatTimestamp(createdAt),
-            updatedAt = DateUtils.formatTimestamp(updatedAt)
+            createdAt = DateUtils.formatToIsoString(createdAt),
+            updatedAt = DateUtils.formatToIsoString(updatedAt)
         )
     }
 
-    fun Task.toEntity(timestampCreated: Long? = null, timestampUpdated: Long? = null, timestampDueDate: Long? = null): TaskEntity {
+    fun Task.toEntity(timestampUpdated: Long? = null): TaskEntity {
         return TaskEntity(
-            id = id.ifEmpty {  UUID.randomUUID().toString() },
+            id = id.ifEmpty { UUID.randomUUID().toString() },
             title = title,
             description = description,
             completed = completed,
-            dueDate = timestampDueDate ?: DateUtils.parseIsoString(dueDate),
-            createdAt = timestampCreated ?: System.currentTimeMillis(),
-            updatedAt = timestampUpdated ?: System.currentTimeMillis()
+            dueDate = DateUtils.parseIsoString(dueDate),
+            createdAt = DateUtils.parseIsoString(createdAt),
+            updatedAt = timestampUpdated ?: DateUtils.parseIsoString(updatedAt)
         )
     }
 
     fun TaskDto.toDomain(): Task {
-        val createdTimestamp =
-            createdAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
-        val updatedTimestamp =
-            updatedAt?.let { DateUtils.parseIsoString(it) } ?: System.currentTimeMillis()
         return Task(
             id = id ?: UUID.randomUUID().toString(),
             title = title ?: "",
             description = description ?: "",
             completed = completed ?: false,
             dueDate = dueDate ?: DateUtils.formatToIsoString(System.currentTimeMillis()),
-            createdAt = DateUtils.formatTimestamp(createdTimestamp),
-            updatedAt = DateUtils.formatTimestamp(updatedTimestamp)
+            createdAt = createdAt ?: DateUtils.formatToIsoString(System.currentTimeMillis()),
+            updatedAt = updatedAt ?: DateUtils.formatToIsoString(System.currentTimeMillis())
         )
     }
 
-    fun Task.toDto(isoCreatedAt: String? = null, isoUpdatedAt: String? = null, isoDueDate: String? = null): TaskDto {
+    fun Task.toDto(): TaskDto {
         return TaskDto(
-            id = id.ifEmpty {  UUID.randomUUID().toString() },
+            id = id.ifEmpty { UUID.randomUUID().toString() },
             title = title,
             description = description.ifEmpty { null },
             completed = completed,
-            dueDate = isoDueDate ?: dueDate,
-            createdAt = isoCreatedAt ?: DateUtils.formatToIsoString(System.currentTimeMillis()),
-            updatedAt = isoUpdatedAt ?: DateUtils.formatToIsoString(System.currentTimeMillis())
+            dueDate = dueDate,
+            createdAt = createdAt,
+            updatedAt = updatedAt
         )
     }
 

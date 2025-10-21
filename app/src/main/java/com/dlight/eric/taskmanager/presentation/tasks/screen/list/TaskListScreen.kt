@@ -1,6 +1,7 @@
 package com.dlight.eric.taskmanager.presentation.tasks.screen.list
 
 import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,18 +39,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dlight.eric.taskmanager.R
 import com.dlight.eric.taskmanager.domain.model.Task
+import com.dlight.eric.taskmanager.presentation.tasks.components.SyncStateHeader
 import com.dlight.eric.taskmanager.presentation.tasks.components.TaskItem
-import com.dlight.eric.taskmanager.presentation.tasks.components.UnSyncedTasksHeader
 import com.dlight.eric.taskmanager.presentation.tasks.event.TaskEvent
+import com.dlight.eric.taskmanager.presentation.tasks.state.SyncState
 import com.dlight.eric.taskmanager.presentation.tasks.state.TaskListUiState
 import com.dlight.eric.taskmanager.presentation.theme.TaskManagerTheme
 import com.dlight.eric.taskmanager.utils.LottieEmptyState
@@ -80,11 +82,12 @@ fun TaskListScreen(
             viewModel.onEvent(TaskEvent.LogOut)
             onLogOut()
         },
-        onPullToRefresh = { viewModel.onEvent(TaskEvent.PullToRefresh) }
+        onPullToRefresh = { viewModel.onEvent(TaskEvent.PullToRefresh) },
+        onTriggerSync = { viewModel.onEvent(TaskEvent.TriggerSync) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TaskListContent(
     uiState: TaskListUiState,
@@ -95,7 +98,8 @@ fun TaskListContent(
     onRetry: () -> Unit,
     onDeleteAll: () -> Unit,
     onLogOut: () -> Unit,
-    onPullToRefresh: () -> Unit
+    onPullToRefresh: () -> Unit,
+    onTriggerSync: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
@@ -251,10 +255,13 @@ fun TaskListContent(
                             ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        if (uiState.unSyncedTaskCount > 0) {
+                        if (uiState.syncState != SyncState.SYNCED) {
                             stickyHeader {
-                                UnSyncedTasksHeader(
-                                    unSyncedCount = uiState.unSyncedTaskCount
+                                SyncStateHeader(
+                                    unSyncedCount = uiState.unSyncedTaskCount,
+                                    syncState = uiState.syncState,
+                                    syncError = uiState.syncError,
+                                    onSyncClick = onTriggerSync
                                 )
                             }
                         }
@@ -348,7 +355,8 @@ fun TaskListEmptyPreview() {
                 onRetry = {},
                 onDeleteAll = {},
                 onLogOut = {},
-                onPullToRefresh = {}
+                onPullToRefresh = {},
+                onTriggerSync = {}
             )
         }
     }
@@ -364,14 +372,15 @@ fun TaskListContentPreview() {
                 lastSyncTime = "5 min ago",
                 unSyncedTaskCount = 2,
                 isPullingToRefresh = true,
+                syncState = SyncState.PENDING,
                 tasks = listOf(
                     Task(
                         id = "1",
                         title = "Buy groceries",
                         description = "Milk, eggs, bread",
                         completed = false,
-                        createdAt = "Today",
-                        updatedAt = "2 hours ago",
+                        createdAt = "2025-01-19T08:00:00Z",
+                        updatedAt = "2025-01-19T14:00:00Z",
                         dueDate = "Today"
                     ),
                     Task(
@@ -379,8 +388,8 @@ fun TaskListContentPreview() {
                         title = "Complete project",
                         description = "Finish the Android app for d.Light",
                         completed = false,
-                        createdAt = "Yesterday",
-                        updatedAt = "1 hour ago",
+                        createdAt = "2025-01-18T10:00:00Z",
+                        updatedAt = "2025-01-18T16:00:00Z",
                         dueDate = "Today"
                     ),
                     Task(
@@ -388,8 +397,8 @@ fun TaskListContentPreview() {
                         title = "Call mom",
                         description = "Weekly check-in call",
                         completed = true,
-                        createdAt = "2 days ago",
-                        updatedAt = "Yesterday",
+                        createdAt = "2025-01-17T09:00:00Z",
+                        updatedAt = "2025-01-18T11:30:00Z",
                         dueDate = "Today"
                     )
                 )
@@ -401,7 +410,8 @@ fun TaskListContentPreview() {
             onRetry = {},
             onDeleteAll = {},
             onLogOut = {},
-            onPullToRefresh = {}
+            onPullToRefresh = {},
+            onTriggerSync = {}
         )
     }
 }
@@ -423,7 +433,8 @@ fun TaskListErrorPreview() {
             onRetry = {},
             onDeleteAll = {},
             onLogOut = {},
-            onPullToRefresh = {}
+            onPullToRefresh = {},
+            onTriggerSync = {}
         )
     }
 }

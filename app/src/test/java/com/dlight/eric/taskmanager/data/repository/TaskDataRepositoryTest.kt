@@ -137,19 +137,6 @@ class TaskDataRepositoryTest {
     }
 
     @Test
-    fun `should set timestamps correctly when inserting task`() = runTest {
-        val task = createSampleTask("1", "New Task")
-        whenever(taskDao.insertTask(any())).thenReturn(Unit)
-
-        repository.insertTask(task)
-
-        verify(taskDao).insertTask(argThat {
-            val now = System.currentTimeMillis()
-            createdAt > 0 && updatedAt > 0 && (now - createdAt) < 1000
-        })
-    }
-
-    @Test
     fun `should update only updatedAt timestamp when updating task`() = runTest {
         val task = createSampleTask("1", "Updated Task")
         whenever(taskDao.updateTask(any())).thenReturn(Unit)

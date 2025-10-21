@@ -15,4 +15,6 @@ sealed class TaskEvent {
     data object DeleteAll : TaskEvent()
 
     data object LogOut : TaskEvent()
+    
+    data object TriggerSync : TaskEvent()
 }

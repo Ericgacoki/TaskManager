@@ -13,6 +13,8 @@ interface TaskRepository {
     
     suspend fun insertTask(task: Task): Resource<Unit>
     
+    suspend fun insertTasks(tasks: List<Task>): Resource<Unit>
+    
     suspend fun updateTask(task: Task): Resource<Unit>
     
     suspend fun updateTaskCompletion(id: String, completed: Boolean): Resource<Unit>
@@ -25,6 +27,8 @@ interface TaskRepository {
     fun getTaskCount(): Flow<Resource<Int>>
 
     fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>>
+    
+    fun getUnSyncedTasks(lastSyncTimestamp: Long): Flow<Resource<List<Task>>>
     
     fun getCompletedTaskCount(): Flow<Resource<Int>>
     

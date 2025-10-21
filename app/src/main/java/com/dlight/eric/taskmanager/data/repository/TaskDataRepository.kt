@@ -9,46 +9,49 @@ import com.dlight.eric.taskmanager.domain.repository.TaskRepository
 import com.dlight.eric.taskmanager.utils.DateUtils
 import com.dlight.eric.taskmanager.utils.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class TaskDataRepository @Inject constructor(
-    private val taskDao: TaskDao,
-    private val appDataStore: AppDataStore
+    private val taskDao: TaskDao, private val appDataStore: AppDataStore
 ) : TaskRepository {
 
-    override fun getAllTasks(): Flow<Resource<List<Task>>> {
-        return taskDao.getAllTasks().map { entities ->
-            try {
+    override fun getAllTasks(): Flow<Resource<List<Task>>> =
+        taskDao.getAllTasks()
+            .map { entities ->
                 val tasks = entities.map { it.toDomain() }
-                Resource.Success(tasks)
-            } catch (e: Exception) {
-                Resource.Error(e.message ?: "Failed to load tasks")
+                Resource.Success(tasks) as Resource<List<Task>>
             }
-        }
-    }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to load tasks")) }
 
-    override fun getTaskById(id: String): Flow<Resource<Task?>> {
-        return taskDao.getTaskById(id).map { entity ->
-            try {
+    override fun getTaskById(id: String): Flow<Resource<Task?>> =
+        taskDao.getTaskById(id)
+            .map { entity ->
                 val task = entity?.toDomain()
-                Resource.Success(task)
-            } catch (e: Exception) {
-                Resource.Error(e.message ?: "Failed to load task")
+                Resource.Success(task) as Resource<Task?>
             }
-        }
-    }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to load task")) }
 
     override suspend fun insertTask(task: Task): Resource<Unit> {
         return try {
-            val entity = task.toEntity(
-                timestampCreated = System.currentTimeMillis(),
-                timestampUpdated = System.currentTimeMillis()
-            )
+            val entity = task.toEntity()
             taskDao.insertTask(entity)
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to insert task")
+        }
+    }
+
+    override suspend fun insertTasks(tasks: List<Task>): Resource<Unit> {
+        return try {
+            val entities = tasks.map { task ->
+                task.toEntity()
+            }
+            taskDao.insertTasks(entities)
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to insert tasks")
         }
     }
 
@@ -89,39 +92,36 @@ class TaskDataRepository @Inject constructor(
             taskDao.deleteTaskById(id)
             Resource.Success(Unit)
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to delete task")
+            Resource.Error(message = e.message ?: "Failed to delete task")
         }
     }
 
-    override fun getTaskCount(): Flow<Resource<Int>> {
-        return taskDao.getTaskCount().map { count ->
-            try {
-                Resource.Success(count)
-            } catch (e: Exception) {
-                Resource.Error(e.message ?: "Failed to get task count")
+    override fun getTaskCount(): Flow<Resource<Int>> =
+        taskDao.getTaskCount()
+            .map { count ->
+                Resource.Success(count) as Resource<Int>
             }
-        }
-    }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get task count")) }
 
-    override fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>> {
-        return taskDao.getUnSyncedTaskCount(lastSyncTimestamp).map { count ->
-            try {
-                Resource.Success(count)
-            } catch (e: Exception) {
-                Resource.Error(e.message ?: "Failed to get task count")
-            }
-        }
-    }
+    override fun getUnSyncedTaskCount(lastSyncTimestamp: Long): Flow<Resource<Int>> =
+        taskDao.getUnSyncedTaskCount(lastSyncTimestamp)
+            .map { count -> Resource.Success(count) as Resource<Int> }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get task count")) }
 
-    override fun getCompletedTaskCount(): Flow<Resource<Int>> {
-        return taskDao.getCompletedTaskCount().map { count ->
-            try {
-                Resource.Success(count)
-            } catch (e: Exception) {
-                Resource.Error(e.message ?: "Failed to get completed task count")
+    override fun getUnSyncedTasks(lastSyncTimestamp: Long): Flow<Resource<List<Task>>> =
+        taskDao.getUnSyncedTasks(lastSyncTimestamp)
+            .map { entities ->
+                val tasks = entities.map { it.toDomain() }
+                Resource.Success(tasks) as Resource<List<Task>>
             }
-        }
-    }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get unsynced tasks")) }
+
+    override fun getCompletedTaskCount(): Flow<Resource<Int>> =
+        taskDao.getCompletedTaskCount()
+            .map { count ->
+                Resource.Success(count) as Resource<Int>
+            }
+            .catch { e -> emit(Resource.Error(e.message ?: "Failed to get completed task count")) }
 
     override suspend fun deleteAllTasks(): Resource<Unit> {
         return try {
@@ -132,19 +132,17 @@ class TaskDataRepository @Inject constructor(
         }
     }
 
-    override fun getFormatedLastSyncTime(): Flow<String?> {
-        return appDataStore.lastSyncTime.map { timestamp ->
-            try {
+    override fun getFormatedLastSyncTime(): Flow<String?> =
+        appDataStore.lastSyncTime
+            .map { timestamp ->
                 if (timestamp != null && timestamp > 0) {
-                    DateUtils.formatTimestamp(timestamp)
+                    val isoString = DateUtils.formatToIsoString(timestamp)
+                    DateUtils.formatToReadableDate(isoString)
                 } else {
                     null
                 }
-            } catch (e: Exception) {
-                null
             }
-        }
-    }
+            .catch { emit(null) }
 
     override fun getLastSyncTimestamp(): Flow<Long?> = appDataStore.lastSyncTime
 }
