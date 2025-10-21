@@ -5,7 +5,6 @@ An offline-first task management Android app built for d.Light's engineering cha
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg">
   <img src="https://img.shields.io/badge/platform-Android-green.svg">
-  <img src="https://img.shields.io/badge/API-26%2B-brightgreen.svg">
   <img src="https://img.shields.io/badge/language-Kotlin-purple.svg">
   <img src="https://img.shields.io/badge/architecture-MVVM%20%2B%20Repository-orange.svg">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg">
@@ -66,7 +65,6 @@ cd TaskManager
 <details>
 <summary><strong>User Actions by Screen and Task Mode</strong></summary>
 
-> [!NOTE]
 > `TaskMode` is a state that defines the actions and behavior of the Task Detail Screen: CREATE (new task), EDIT (modify existing), or VIEW (read-only display).
 >
 > Using TaskMode centralizes state management and significantly reduces the number of screens required to achieve similar functionalities.
@@ -108,7 +106,7 @@ cd TaskManager
 </details>
 
 > [!WARNING]
-> Since Task Manager uses a shared demo server with no authentication, you may see tasks created by other users testing the app. This actually demonstrates the real-time sync capabilities! 😋
+> Since Task Manager uses a shared demo server with no authentication, you may see tasks created by other users testing the app. This actually demonstrates the real-time sync capabilities! Data resets periodically (approximately every 10-15 minutes of inactivity) as the server uses in-memory storage.
 
 ## Design/Architectural decisions
 
@@ -209,10 +207,10 @@ The project includes comprehensive test coverage:
 # Unit tests
 ./gradlew test
 
-# Integration tests (requires device/emulator)
+# Integration tests
 ./gradlew connectedAndroidTest
 
-# All tests with coverage
+# All tests
 ./gradlew testDebugUnitTest connectedDebugAndroidTest
 ```
 
@@ -224,9 +222,9 @@ Below is a screenshot of DAO Test results on an Android 11 OPPO device:
 
 ## Acknowledgments
 
-- Built for the d.light Android Engineer assessment  
+- This project is built for the d.light Android Engineer assessment  
 - Inspired by offline-first architecture patterns  
-- Thanks to the Android community for excellent documentation  
+- Thanks to the Android community for excellent documentation
 
 ## Contributing
 
