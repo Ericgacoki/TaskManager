@@ -123,17 +123,17 @@ TaskManager/
 │   └── src/
 │       ├── main/
 │       │   ├── java/.../taskmanager
-│       │   │   ├── domain/        # Models & interfaces
+│       │   │   ├── domain         # Models & interfaces
 │       │   │   ├── data/          # Repository implementations
-│       │   │   │   ├── local/     # Room database
-│       │   │   │   ├── remote/    # API services
-│       │   │   │   └── mapper/    # Data transformations
-│       │   │   └── presentation/  # UI layer
-│       │   │       ├── viewmodel/ # ViewModels
-│       │   │       ├── screen/    # Compose screens
-│       │   │       └── component/ # Reusable UI components
-│       │   └── res/               # Resources - Icons and stuff
-│       └── test/                  # Unit & integration tests
+│       │   │   │   ├── local      # Room database
+│       │   │   │   ├── remote     # API services
+│       │   │   │   └── mapper     # Data transformations
+│       │   │   └── presentation   # UI layer
+│       │   │       ├── viewmodel  # ViewModels
+│       │   │       ├── screen     # Compose screens
+│       │   │       └── component  # Reusable UI components
+│       │   └── res                # Resources - Icons and stuff
+│       └── test                   # Unit & integration tests
 └── build.gradle.kts               # Build configuration
 ```
 </details>
