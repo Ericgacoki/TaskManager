@@ -5,7 +5,6 @@ An offline-first task management Android app built for d.Light's engineering cha
 <p align="center">
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg">
   <img src="https://img.shields.io/badge/platform-Android-green.svg">
-  <img src="https://img.shields.io/badge/API-26%2B-brightgreen.svg">
   <img src="https://img.shields.io/badge/language-Kotlin-purple.svg">
   <img src="https://img.shields.io/badge/architecture-MVVM%20%2B%20Repository-orange.svg">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg">
@@ -21,15 +20,13 @@ An offline-first task management Android app built for d.Light's engineering cha
 
 ## Features
 
-- [x] **Full Offline Support** – Create, view, update, and delete tasks without a network connection  
-- [x] **Automatic Sync** – Background synchronization when a network is available  
-- [x] **Conflict Resolution** – Last-write-wins strategy for predictable data merging  
-- [x] **MVVM + Repository Pattern** – Layered design using Room as the single source of truth  
-- [x] **Real-time Updates** – Instant UI updates powered by Kotlin Flow  
-- [x] **Network Monitoring** – Detects connectivity changes to trigger immediate sync  
-- [x] **Background Sync** – WorkManager ensures data consistency even when the app is closed  
-- [x] **Compose Previews** – Each UI component includes previews for faster development  
-- [ ] **Advanced Sync** – User-driven conflict resolution *(in development)*  
+- Full Offline Support - Create, edit, delete, and mark task as complete.
+- Real-time/Instant UI Updates
+- Automatic Sync
+- Conflict Resolution
+- Network Monitoring
+- Background Sync
+- Advanced Sync *(in development)*  
 
 
 ## Installation
@@ -39,7 +36,6 @@ An offline-first task management Android app built for d.Light's engineering cha
 - Android Studio Meerkat | 2024.3.1 Patch 2 or later
 - JDK 17
 - Android SDK 35 (minSdk 26)
-- Node.js (for mock server)
 
 ### Setup
 
@@ -48,47 +44,87 @@ An offline-first task management Android app built for d.Light's engineering cha
 git clone https://github.com/Ericgacoki/TaskManager.git
 cd TaskManager
 ```
-2. Install and start the mock server:
+
+2. Build and install:
 ```bash
-npm install -g json-server
-json-server --watch db.json --port 3000
+./gradlew installDebug
 ```
 
-3. Build and run:
-```bash
-# For emulator (uses http://10.0.2.2:3000)
-./gradlew installEmulatorDebug
-
-# For physical device (update IP in build.gradle)
-./gradlew installDeviceDebug
-```
+> [!Note] 
+> The app uses a deployed mock server on [Vercel](https://task-manager-kzckwn8js-ericgacokis-projects.vercel.app/) - no local server setup is required!
 
 ## Usage
 
 ### Running the App
 
-1. **Start the mock server** (see Installation)
-2. **Launch the app** from Android Studio or command line
-3. **Login** with any email (no password required)
-4. **Create tasks** - Works immediately, even offline
-5. **Toggle network** - Watch automatic sync in action
+1. **Launch Task Manager** once installation is done
+2. **Login** with any valid email (no password required)
+3. **Create tasks** - Works immediately, even offline
+4. **Toggle network** to see automatic sync in action
+
+<details>
+<summary><strong>User Actions by Screen and Task Mode</strong></summary>
+
+> `TaskMode` is a state that defines the actions and behavior of the Task Detail Screen: CREATE (new task), EDIT (modify existing), or VIEW (read-only display).
+>
+> Using TaskMode centralizes state management and significantly reduces the number of screens required to achieve similar functionalities.
+
+**Login Screen:**
+- Enter any valid email address
+- Tap "Log In" (A short delay simulates network call)
+
+**Task List Screen:**
+- View all tasks
+- View the last successful sync time
+- Pull down to refresh
+- Trigger manual sync and retry failed sync
+- Tap FAB (+ button) to create new task. Auto enters CREATE mode.
+- Tap any task to view details
+- Toggle task completion/delete via dropdown menu
+- Delete all tasks
+- Log out
+
+**Task Detail Screen (CREATE mode):**
+- Enter task title and description
+- Select due date
+- Tap `Save` to create task or `Cancel` to discard
+- Tap back arrow to cancel
+
+**EDIT mode**
+- Tap edit form task menu or the pen icon to enter EDIT mode
+- Modify title, description, or due date
+- Tap "Save" to update task. This auto switches to VIEW mode
+- Tap back arrow (unsaved changes show discard dialog)
+
+**VIEW mode**
+- View full details of a task
+- Tap edit icon to switch to EDIT mode
+- Tap delete icon to delete
+- Toggle task completion via the checkbox 
+- Tap back arrow to return to list
+
+</details>
+
+> [!WARNING]
+> Since Task Manager uses a shared demo server with no authentication, you may see tasks created by other users testing the app. This actually demonstrates the real-time sync capabilities! Data resets periodically (approximately every 10-15 minutes of inactivity) as the server uses in-memory storage.
 
 ## Design/Architectural decisions
 
 ### Tech Stack
 
-- **Language:** Kotlin
-- **UI:** Jetpack Compose with Material 3
-- **Architecture:** MVVM + Repository Pattern
-- **Database:** Room
-- **Storage:** DataStore (preferences)
-- **Networking:** Retrofit + OkHttp
-- **DI:** Hilt/Dagger
-- **Async:** Kotlin Coroutines + Flow
-- **Background:** WorkManager
-- **System:** NetworkMonitor
-- **Animations:** Lottie
-- **Testing:** JUnit, Mockito, MockWebServer
+- **Language:** Kotlin  
+- **Architecture:** MVVM + Repository Pattern  
+- **DI:** Hilt / Dagger  
+- **UI:** Jetpack Compose with Material 3  
+- **Animations:** Lottie  
+- **Development:** Compose Previews (each UI component includes previews for rapid development)  
+- **Database:** Room as the single source of truth  
+- **Storage:** DataStore (preferences)  
+- **Networking:** Retrofit + OkHttp  
+- **Async:** Kotlin Coroutines + Flow (enables real-time UI updates)  
+- **Background:** WorkManager  
+- **System:** NetworkMonitor (connectivity detection)  
+- **Testing:** JUnit, Mockito, MockWebServer  
 
 ### Project Structure
 
@@ -115,7 +151,7 @@ graph RL
 ```
 
 <details>
-<summary>Detailed Project Structure</summary>
+<summary>Package Structure</summary>
 
 ```
 TaskManager/
@@ -171,10 +207,10 @@ The project includes comprehensive test coverage:
 # Unit tests
 ./gradlew test
 
-# Integration tests (requires device/emulator)
+# Integration tests
 ./gradlew connectedAndroidTest
 
-# All tests with coverage
+# All tests
 ./gradlew testDebugUnitTest connectedDebugAndroidTest
 ```
 
@@ -184,13 +220,11 @@ Below is a screenshot of DAO Test results on an Android 11 OPPO device:
 
 ![Dao Test Results](images/dao_tests.png)
 
-More test results can be viewed [here]()
-
 ## Acknowledgments
 
-- Built for the d.light Android Engineer assessment  
+- This project is built for the d.light Android Engineer assessment  
 - Inspired by offline-first architecture patterns  
-- Thanks to the Android community for excellent documentation  
+- Thanks to the Android community for excellent documentation
 
 ## Contributing
 

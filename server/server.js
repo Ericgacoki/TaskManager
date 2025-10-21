@@ -1,8 +1,14 @@
 const jsonServer = require('json-server');
-const path = require('path');
 
 const server = jsonServer.create();
-const router = jsonServer.router(path.join(__dirname, 'db.json'));
+
+// Use in-memory database for Vercel serverless environment
+// Data persists during function lifetime but resets on cold-starts
+const db = {
+  tasks: []
+};
+
+const router = jsonServer.router(db);
 const middlewares = jsonServer.defaults({
   noCors: false
 });

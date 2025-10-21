@@ -8,7 +8,10 @@ A Node.js mock server for the TaskManager Android app using json-server.
 - **Mock authentication** endpoint
 - **CORS enabled** for cross-origin requests
 - **Network latency simulation** (500ms delay)
-- **Ready for deployment** on Render, Heroku, or similar platforms
+- **In-memory database** for Vercel serverless environment
+- **Ready for deployment** on Vercel or similar serverless platforms
+
+> **Note:** Data is stored in memory and resets when the serverless function cold-starts (approximately every 10-15 minutes of inactivity). This is ideal for demo/testing purposes.
 
 ## Available Endpoints
 
@@ -48,13 +51,14 @@ npm run dev
 
 ## Deployment
 
-### Render
+### Vercel
 
 1. Push this folder to a GitHub repository
-2. Connect to Render and select this repository
-3. Set the build command: `npm install`
-4. Set the start command: `npm start`
-5. Deploy!
+2. Connect to Vercel and import this repository
+3. Set root directory to `server` folder
+4. Deploy!
+
+The server will automatically use in-memory storage in the serverless environment.
 
 ### Environment Variables
 
