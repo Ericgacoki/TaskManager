@@ -11,13 +11,16 @@ An offline-first task management Android app built for d.Light's engineering cha
 </p>
 
 ## Demo
+### Watch on YouTube
+
+[![TaskManager Demo](https://img.youtube.com/vi/UJFAlpw0qwc/maxresdefault.jpg)](https://www.youtube.com/watch?v=UJFAlpw0qwc)
+
+### Screenshots
 
 <div align="left">
-  <a href="images/demo.mp4">
-    <img src="images/welcome.jpg" width="270" alt="Demo Video"/>
-  </a>
   <img src="images/tasks.jpg" width="270" alt="Task List"/>
-  <img src="images/create_task.jpg" width="270" alt="Edit Task"/>
+  <img src="images/create_task.jpg" width="270" alt="Create Task"/>
+  <img src="images/edit_task.jpg" width="270" alt="Task List"/>
 </div>
 
 ## Features
