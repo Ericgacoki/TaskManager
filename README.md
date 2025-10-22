@@ -12,11 +12,13 @@ An offline-first task management Android app built for d.Light's engineering cha
 
 ## Demo
 
-*⚠️ TODO:*
-- Add 3min video
-- Add 2 screenshots
-
-<img alt ="Gif/Video" src="" width="270"/> <img src="" width="270" alt="Image"/> <img src="" width="270" alt="Image"/>
+<div align="left">
+  <a href="images/demo.mp4">
+    <img src="images/welcome.jpg" width="270" alt="Demo Video"/>
+  </a>
+  <img src="images/tasks.jpg" width="270" alt="Task List"/>
+  <img src="images/create_task.jpg" width="270" alt="Edit Task"/>
+</div>
 
 ## Features
 
@@ -114,7 +116,7 @@ cd TaskManager
 
 - **Language:** Kotlin  
 - **Architecture:** MVVM + Repository Pattern  
-- **DI:** Hilt / Dagger  
+- **DI:** Hilt  
 - **UI:** Jetpack Compose with Material 3  
 - **Animations:** Lottie  
 - **Development:** Compose Previews (each UI component includes previews for rapid development)  
@@ -123,7 +125,7 @@ cd TaskManager
 - **Networking:** Retrofit + OkHttp  
 - **Async:** Kotlin Coroutines + Flow (enables real-time UI updates)  
 - **Background:** WorkManager  
-- **System:** NetworkMonitor (connectivity detection)  
+- **System:** NetworkMonitor  
 - **Testing:** JUnit, Mockito, MockWebServer  
 
 ### Project Structure

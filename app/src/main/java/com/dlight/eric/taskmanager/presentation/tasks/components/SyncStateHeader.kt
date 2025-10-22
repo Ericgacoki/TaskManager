@@ -63,6 +63,7 @@ fun SyncStateHeader(
                 when (syncState) {
                     SyncState.SYNCING -> {
                         CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier
                                 .padding(vertical = 12.dp)
                                 .size(20.dp),
@@ -70,7 +71,8 @@ fun SyncStateHeader(
                         )
                         Text(
                             text = "Syncing...",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
 
@@ -97,7 +99,8 @@ fun SyncStateHeader(
                         )
                         Text(
                             text = "$unSyncedCount ${if (unSyncedCount == 1) "task" else "tasks"} to sync",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color= MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
 

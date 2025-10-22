@@ -83,10 +83,9 @@ fun LoginScreenContent(
         ) {
             Text(
                 text = "Welcome to",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 4.dp)
             )
 
             Text(

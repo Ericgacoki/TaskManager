@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity(), NetworkMonitor.ConnectivityListener {
             val message = if (isConnected) {
                 "Back online!"
             } else {
-                "You're offline \uD83D\uDCA9"
+                "You're offline!"
             }
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
