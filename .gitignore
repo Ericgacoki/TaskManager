@@ -20,3 +20,4 @@ node_modules/
 server/package-lock.json
 secrets.properties
 /.kotlin/
+/app/release
