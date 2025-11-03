@@ -22,6 +22,7 @@ coroutinesTest = "1.9.0"
 mockito = "5.12.0"
 mockitoKotlin = "5.4.0"
 lottie = "6.6.0"
+uiautomator = "2.3.0"
 
 [libraries]
 # Core Android
@@ -74,6 +75,7 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }

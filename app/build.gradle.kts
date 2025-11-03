@@ -18,7 +18,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.dlight.eric.taskmanager.HiltTestRunner"
     }
 
     buildTypes {
@@ -109,6 +109,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.androidx.test.uiautomator)
     kspAndroidTest(libs.hilt.compiler)
     
     // Debug

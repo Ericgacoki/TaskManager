@@ -41,7 +41,7 @@ fun LottieEmptyState(
         )
         val progress by animateLottieCompositionAsState(
             composition = composition,
-            iterations = if (loop) LottieConstants.IterateForever else 1
+            iterations = if (loop && !isInTest()) LottieConstants.IterateForever else 1
         )
 
         LottieAnimation(
