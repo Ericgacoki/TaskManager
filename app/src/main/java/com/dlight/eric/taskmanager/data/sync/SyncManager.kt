@@ -105,8 +105,10 @@ class SyncManager @Inject constructor(
             }
         }
 
-        // STEP 7: Save to Room
-        // Save server-only tasks (bulk insert)
+        val serverWinners = conflictResolutions.filterIsInstance<ConflictResult.ServerWins>()
+        val localWinners = conflictResolutions.filterIsInstance<ConflictResult.LocalWins>()
+
+        // STEP 7: Download Phase: Save server-only tasks to Room
         if (serverOnly.isNotEmpty()) {
             val insertResult = taskRepository.insertTasks(serverOnly)
             if (insertResult !is Resource.Success) {
@@ -116,7 +118,6 @@ class SyncManager @Inject constructor(
         }
 
         // Save server winners from conflicts
-        val serverWinners = conflictResolutions.filterIsInstance<ConflictResult.ServerWins>()
         serverWinners.forEach { result ->
             val updateResult = taskRepository.updateTask(result.task)
             if (updateResult !is Resource.Success) {
@@ -125,10 +126,10 @@ class SyncManager @Inject constructor(
             }
         }
 
-        // STEP 8: Upload to server
-        // Upload local-only tasks (parallel execution)
+        // STEP 8: Upload Phase - Push local-only data to server
         coroutineScope {
-            localOnly.map { localTask ->
+            // Upload local-only tasks (new tasks not on server)
+            val createTasks = localOnly.map { localTask ->
                 async {
                     val createResult = createServerTask(localTask)
                         .first { it !is Resource.Loading }
@@ -137,13 +138,10 @@ class SyncManager @Inject constructor(
                         throw Exception(error)
                     }
                 }
-            }.awaitAll()
-        }
+            }
 
-        // Upload local winners from conflicts (parallel execution)
-        val localWinners = conflictResolutions.filterIsInstance<ConflictResult.LocalWins>()
-        coroutineScope {
-            localWinners.map { result ->
+            // Upload local winners from conflicts (overwrites server version)
+            val updateTasks = localWinners.map { result ->
                 async {
                     val updateResult = updateServerTask(result.task)
                         .first { it !is Resource.Loading }
@@ -153,7 +151,10 @@ class SyncManager @Inject constructor(
                         throw Exception(error)
                     }
                 }
-            }.awaitAll()
+            }
+
+            // upload in parallel
+            (createTasks + updateTasks).awaitAll()
         }
 
         // STEP 9: Update sync time
@@ -161,7 +162,7 @@ class SyncManager @Inject constructor(
 
         emit(Resource.Success(Unit))
     }.catch { e ->
-        val errorMsg = e.message ?: "Error"
+        val errorMsg = e.message ?: "Sync Error"
         emit(Resource.Error(errorMsg))
     }
 
@@ -174,7 +175,7 @@ class SyncManager @Inject constructor(
         val domainTasks = serverTasks.map { it.toDomain() }
         emit(Resource.Success(domainTasks))
     }.catch { e ->
-        val error = e.message ?: "Error"
+        val error = e.message ?: "Error Fetching Tasks"
         emit(Resource.Error(error))
     }
 
@@ -184,7 +185,7 @@ class SyncManager @Inject constructor(
         val createdTask = createdTaskDto.toDomain()
         emit(Resource.Success(createdTask))
     }.catch { e ->
-        val error = e.message ?: "Error"
+        val error = e.message ?: "Error Creating Task"
         emit(Resource.Error(error))
     }
 
@@ -194,7 +195,7 @@ class SyncManager @Inject constructor(
         val updatedTask = updatedTaskDto.toDomain()
         emit(Resource.Success(updatedTask))
     }.catch { e ->
-        val error = e.message ?: "Error"
+        val error = e.message ?: "Error Updating Task"
         emit(Resource.Error(error))
     }
 }
